@@ -16,6 +16,32 @@ Linguagem: Java 25
 
 IDE: IntelliJ
 
+Claro. Aqui estão as seções "Como Rodar o Projeto" e "Estrutura do Código" do README.md, formatadas em Markdown para você.
+
+Como Rodar o Projeto
+Pré-requisitos
+Certifique-se de ter o JDK (Java Development Kit) instalado em sua máquina.
+
+Via Linha de Comando (Bash ou Terminal)
+Clone o repositório:
+
+Bash
+
+git clone https://github.com/mauricioffdev/Escalator-Project.git
+cd Escalator-Project
+Compile o código:
+
+Bash
+
+mvn clean compile
+Execute o programa:
+
+Bash
+
+mvn exec:java -Dexec.mainClass="br.com.escalator.App"
+
+Claro. Aqui estão as seções "Como Rodar o Projeto" e "Estrutura do Código" do README.md, formatadas em Markdown para você.
+
 Como Rodar o Projeto
 Pré-requisitos
 Certifique-se de ter o JDK (Java Development Kit) instalado em sua máquina.
