@@ -16,61 +16,38 @@ Linguagem: Java 25
 
 IDE: IntelliJ
 
-Claro. Aqui estão as seções "Como Rodar o Projeto" e "Estrutura do Código" do README.md, formatadas em Markdown para você.
+### Como Rodar o Projeto
 
-Como Rodar o Projeto
-Pré-requisitos
-Certifique-se de ter o JDK (Java Development Kit) instalado em sua máquina.
+#### Pré-requisitos
 
-Via Linha de Comando (Bash ou Terminal)
-Clone o repositório:
+Certifique-se de ter o **JDK (Java Development Kit)** instalado em sua máquina.
 
-Bash
+#### Via Linha de Comando (Bash ou Terminal)
 
-git clone https://github.com/mauricioffdev/Escalator-Project.git
-cd Escalator-Project
-Compile o código:
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/mauricioffdev/Escalator-Project.git](https://github.com/mauricioffdev/Escalator-Project.git)
+    cd Escalator-Project
+    ```
+2.  **Compile o código:**
+    ```bash
+    mvn clean compile
+    ```
+3.  **Execute o programa:**
+    ```bash
+    mvn exec:java -Dexec.mainClass="br.com.escalator.App"
+    ```
 
-Bash
+### Estrutura do Código
 
-mvn clean compile
-Execute o programa:
+O projeto segue a arquitetura de pacotes padrão Java (`br.com.escalator`):
 
-Bash
-
-mvn exec:java -Dexec.mainClass="br.com.escalator.App"
-
-Claro. Aqui estão as seções "Como Rodar o Projeto" e "Estrutura do Código" do README.md, formatadas em Markdown para você.
-
-Como Rodar o Projeto
-Pré-requisitos
-Certifique-se de ter o JDK (Java Development Kit) instalado em sua máquina.
-
-Via Linha de Comando (Bash ou Terminal)
-Clone o repositório:
-
-Bash
-
-git clone https://github.com/mauricioffdev/Escalator-Project.git
-cd Escalator-Project
-Compile o código:
-
-Bash
-
-mvn clean compile
-Execute o programa:
-
-Bash
-
-mvn exec:java -Dexec.mainClass="br.com.escalator.App"
-Estrutura do Código
-O projeto segue a arquitetura de pacotes padrão Java (br.com.escalator):
-
-Pacote	Classes	Descrição
-br.com.escalator	App.java	Contém o método main(), o loop principal e a interação com o usuário (Scanner).
-br.com.escalator.model	Nota.java (Enum)	Define as 12 notas cromáticas e lida com a lógica modular de semitons.
-Escala.java	Define a estrutura de uma escala (seus intervalos) e calcula as notas reais.
-br.com.escalator.service	GeradorDePadroes.java	Contém a lógica de treino: geração de sequências de N notas e sequências de tríades.
+| Pacote | Classes | Descrição |
+| :--- | :--- | :--- |
+| `br.com.escalator` | `App.java` | Contém o método `main()`, o loop principal e a interação com o usuário (`Scanner`). |
+| `br.com.escalator.model` | `Nota.java` (Enum) | Define as 12 notas cromáticas e lida com a lógica modular de semitons. |
+| | `Escala.java` | Define a estrutura de uma escala (seus intervalos) e calcula as notas reais. |
+| `br.com.escalator.service` | `GeradorDePadroes.java` | Contém a lógica de treino: geração de sequências de N notas e sequências de tríades. |
 
 Observação
 Este projeto foi feito com a ajuda do Gemini para resolver erros e implementar a lógica de forma otimizada. Os comentários no código-fonte foram mantidos como material de estudo e para facilitar o entendimento de cada etapa.
