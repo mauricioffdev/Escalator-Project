@@ -105,7 +105,8 @@ Pressione ENTER para escolher outra escala ou digite 'Sair'.
 
 💡 Observação
 
-Este projeto foi feito com a ajuda do Gemini para resolver erros e implementar a lógica de forma otimizada. Os comentários no código-fonte foram mantidos como material de estudo e para facilitar o entendimento de cada etapa.
+Este projeto foi feito com a ajuda do Gemini para resolver erros e implementar a lógica de forma otimizada. 
+Os comentários no código-fonte foram mantidos como material de estudo e para facilitar o entendimento de cada etapa.
 
 👨‍💻 Desenvolvido por
 
