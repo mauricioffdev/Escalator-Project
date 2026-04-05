@@ -1,28 +1,38 @@
-# 🎸 Escalator: Gerador de Padrões e Análise Harmônica para Guitarristas
+# Escalator
 
 [![Java](https://img.shields.io/badge/java-25-blue.svg)](https://www.oracle.com/java/technologies/javase-downloads.html)
 
-O **Escalator** é um projeto de linha de comando para o treino de escalas e técnica musical. Como teste inicial, ele permite ao usuário escolher entre escalas maiores e suas relativas menores, gerando a escala menor natural correspondente.
+Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em escalas diatonicas, triades e visualizacao de shapes no braco.
 
-Atualmente, o sistema oferece três tipos de padrões de estudo:
+## Principais recursos
 
-- 🎵 **Sequência de 3 notas:** Um padrão para o treino de agilidade.
-- 🎶 **Tríades Diatônicas:** Geração do campo harmônico por tríades para cada grau da escala, ideal para o estudo da harmonia.
-- 🎸 **Tablatura de Escalas Maiores e Menores:** Impressão visual do padrão da escala maior ou menor em formato de tablatura para facilitar o treino em instrumentos de cordas.
+- Escala maior e menor natural (relativa).
+- Sequencia de 3 notas e triades diatonicas.
+- Padrao 3 notas por corda com saida em tablatura.
+- Diagrama interativo de 6 cordas e 24 trastes com tonica destacada.
+- Conversao de notacao com sustenidos e bemois conforme a tonalidade.
 
-Um detalhe importante é que o Escalator respeita as regras da teoria musical em relação ao uso de **sustenidos (#)** e **bemóis (b)**, garantindo que a notação esteja sempre correta para cada ciclo de tonalidades.
+![Preview da Interface Web](docs/images/tela_escalator.png)
 
-No futuro, pretendo adicionar **tétrades**, **pentatônica menor**, **pentatônica blues** e outros padrões comuns de improvisação.
+## Estrutura
 
----
+- `src/main/java/br/com/escalator/model`
+- `src/main/java/br/com/escalator/service`
+- `src/main/java/br/com/escalator/web`
+- `src/main/resources/templates/index.html`
+- `src/main/resources/static/css/style.css`
 
-## 🛠 Tecnologias
+## Stack
 
-- **Linguagem:** Java 25 LTS ☕
-- **IDE:** IntelliJ IDEA 💻
+- Java 25
+- Spring Boot
+- Thymeleaf
+- Bootstrap
+- Maven
 
----
+## Autor
 
+<<<<<<< HEAD
 ## ▶️ Como Rodar o Projeto
 
 ### Pré-requisitos
@@ -111,3 +121,6 @@ Os comentários no código-fonte foram mantidos como material de estudo e para f
 👨‍💻 Desenvolvido por
 
 Maurício Filadelfo Filho
+=======
+Mauricio Filadelfo Filho
+>>>>>>> e826cc7 (feat: implementa interface web com diagrama interativo de braço de guitarra)

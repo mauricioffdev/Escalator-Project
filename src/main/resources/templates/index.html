@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Escalator Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <!-- Estilos do Braço da Guitarra -->
+    <style>
+        .fretboard-scroll {
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: #5f88b7 #101820;
+        }
+
+        .fretboard-scroll::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .fretboard-scroll::-webkit-scrollbar-track {
+            background: #101820;
+            border-radius: 999px;
+        }
+
+        .fretboard-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #2b5f92, #4d86bf);
+            border-radius: 999px;
+            border: 1px solid #0a121a;
+        }
+
+        .fretboard-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #3574ad, #5b98d7);
+        }
+
+        .fretboard-container {
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 10px 0;
+            width: max-content;
+            min-width: 1320px;
+        }
+
+        .string {
+            display: flex;
+            height: 40px;
+            align-items: center;
+            position: relative;
+            width: max-content;
+            min-width: 1320px;
+        }
+
+        .string::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #888;
+            z-index: 1;
+        }
+
+        .fret {
+            flex: 1;
+            height: 100%;
+            border-right: 3px solid #bba371;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .fret:first-child {
+            border-right: 6px solid #e0e0e0;
+            flex: 0.5;
+        }
+
+        .note-dot {
+            width: 26px;
+            height: 26px;
+            background-color: #17a2b8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+
+        .root-note {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="hero-glow"></div>
+<main class="container py-4 py-md-5">
+    <section class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="panel p-3 p-md-4 p-lg-5">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+                    <div>
+                        <h1 class="display-6 mb-1">Escalator Web Lab</h1>
+                        <p class="subtitle mb-0">Gere estudos de escala, tríades e tablatura sem perder legibilidade.</p>
+                    </div>
+                    <span class="badge text-bg-light px-3 py-2">Thymeleaf + Bootstrap</span>
+                </div>
+
+                <div class="card mt-4 bg-dark text-light border-0">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Diagrama do Braço</h5>
+                        <div class="fretboard-scroll">
+                            <div id="fretboard" class="fretboard-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="get" th:action="@{/}" class="row g-3 align-items-end">
+                    <input type="hidden" name="gerar" value="true">
+
+                    <div class="col-12 col-md-4">
+                        <label for="modo" class="form-label">Modo de estudo</label>
+                        <select id="modo" name="modo" class="form-select">
+                            <option value="1" th:selected="${modoSelecionado == '1'}">Escala Maior</option>
+                            <option value="2" th:selected="${modoSelecionado == '2'}">Menor Natural (Relativa)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label for="tonica" class="form-label">Tônica base</label>
+                        <select id="tonica" name="tonica" class="form-select">
+                            <option th:each="nota : ${tonicas}" th:value="${nota}" th:text="${nota}" th:selected="${nota == tonicaSelecionada}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label for="padrao" class="form-label">Padrão</label>
+                        <select id="padrao" name="padrao" class="form-select">
+                            <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
+                            <option value="2" th:selected="${padraoSelecionado == '2'}">Sequência de tríades</option>
+                            <option value="3" th:selected="${padraoSelecionado == '3'}">3 notas por corda</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Gerar</button>
+                    </div>
+                </form>
+
+                <div th:if="${erro}" class="alert alert-danger mt-4 mb-0" th:text="${erro}"></div>
+
+                <section th:if="${resultado}" class="result mt-4 mt-md-5">
+                    <h2 class="h4 mb-3" th:text="${resultado.titulo}"></h2>
+
+                    <p class="mb-2"><strong>Notas:</strong> <span id="notas-resultado" th:text="${resultado.notasFormatadas}"></span></p>
+                    <p class="mb-3"><strong>Padrão escolhido:</strong> <span th:text="${resultado.nomePadrao}"></span></p>
+
+                    <div th:if="${resultado.tablaturaFormatada != ''}" class="tab-box">
+                        <pre class="tablatura" th:text="${resultado.tablaturaFormatada}"></pre>
+                    </div>
+
+                    <ul th:if="${!resultado.linhasSaida.isEmpty()}" class="list-group list-group-flush">
+                        <li class="list-group-item px-0" th:each="linha : ${resultado.linhasSaida}" th:text="${linha}"></li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- NOVA Lógica do JavaScript (Lê a Tablatura) -->
+<script>
+    const notasCromaticas = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    // Importante: Index 0 é a corda E aguda (e), Index 5 é a corda E grave (E)
+    const afinacaoPadrao = ["E", "B", "G", "D", "A", "E"];
+    const totalTrastes = 24;
+
+    function normalizarNota(nota) {
+        if (!nota) {
+            return "";
+        }
+
+        const mapaEnarmonico = {
+            "Db": "C#",
+            "Eb": "D#",
+            "Gb": "F#",
+            "Ab": "G#",
+            "Bb": "A#",
+            "Cb": "B",
+            "Fb": "E",
+            "E#": "F",
+            "B#": "C"
+        };
+
+        const notaLimpa = nota.trim();
+        return mapaEnarmonico[notaLimpa] || notaLimpa;
+    }
+
+    function extrairEscalaDaTela() {
+        const spanNotas = document.getElementById("notas-resultado");
+        if (!spanNotas || !spanNotas.innerText) {
+            return [];
+        }
+
+        const notasCapturadas = spanNotas.innerText.match(/[A-G](?:#|b)?/g) || [];
+        const escalaNormalizada = notasCapturadas.map(normalizarNota).filter(Boolean);
+
+        return [...new Set(escalaNormalizada)];
+    }
+
+    function extrairCoordenadasDaTablatura() {
+        const coordenadas = [];
+        const preTablatura = document.querySelector(".tablatura");
+
+        if (!preTablatura || !preTablatura.innerText) {
+            return coordenadas;
+        }
+
+        const linhasText = preTablatura.innerText.trim().split('\n');
+        const linhasDeCorda = linhasText.filter(linha => linha.includes('|'));
+
+        if (linhasDeCorda.length < 6) {
+            return coordenadas;
+        }
+
+        const seisCordas = linhasDeCorda.slice(0, 6);
+        seisCordas.forEach((linha, stringIndex) => {
+            const numerosEncontrados = linha.matchAll(/\d+/g);
+
+            for (const match of numerosEncontrados) {
+                const casaTocada = parseInt(match[0], 10);
+                if (!Number.isNaN(casaTocada)) {
+                    coordenadas.push({ stringIndex: stringIndex, fret: casaTocada });
+                }
+            }
+        });
+
+        return coordenadas;
+    }
+
+    function desenharBracoDaGuitarra(coordenadasShape, tonicaAtiva, escalaAtiva, mostrarEscalaCompleta) {
+        const board = document.getElementById("fretboard");
+        board.innerHTML = "";
+
+        const tonicaNormalizada = normalizarNota(tonicaAtiva);
+        const escalaSet = new Set((escalaAtiva || []).map(normalizarNota));
+        const coordenadasSet = new Set((coordenadasShape || []).map(coord => `${coord.stringIndex}-${coord.fret}`));
+
+        afinacaoPadrao.forEach((cordaAberta, stringIndex) => {
+            const linhaCorda = document.createElement("div");
+            linhaCorda.className = "string";
+
+            let indexNotaInicial = notasCromaticas.indexOf(cordaAberta);
+
+            for (let traste = 0; traste <= totalTrastes; traste++) {
+                const espacoTraste = document.createElement("div");
+                espacoTraste.className = "fret";
+
+                let indexNotaAtual = (indexNotaInicial + traste) % 12;
+                let notaAtual = notasCromaticas[indexNotaAtual];
+
+                const fazParteDoShape = mostrarEscalaCompleta
+                    ? escalaSet.has(notaAtual)
+                    : coordenadasSet.has(`${stringIndex}-${traste}`);
+
+                if (fazParteDoShape) {
+                    const bolinhaNota = document.createElement("div");
+                    bolinhaNota.className = "note-dot";
+                    bolinhaNota.innerText = notaAtual;
+
+                    if (notaAtual === tonicaNormalizada) {
+                        bolinhaNota.classList.add("root-note");
+                    }
+
+                    espacoTraste.appendChild(bolinhaNota);
+                }
+
+                linhaCorda.appendChild(espacoTraste);
+            }
+            board.appendChild(linhaCorda);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const selectTonica = document.getElementById("tonica");
+        const tonica = normalizarNota(selectTonica ? selectTonica.value : "C");
+        const escalaAtiva = extrairEscalaDaTela();
+        const coordenadasDoShape = extrairCoordenadasDaTablatura();
+        const mostrarEscalaCompleta = coordenadasDoShape.length === 0;
+
+        desenharBracoDaGuitarra(coordenadasDoShape, tonica, escalaAtiva, mostrarEscalaCompleta);
+    });
+</script>
+
+<!-- Scripts do Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmxc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
