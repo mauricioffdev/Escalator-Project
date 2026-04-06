@@ -26,11 +26,8 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 - Spring Boot
 - Thymeleaf
 - Bootstrap
-- Maven
+- Maven  
 
-## Autor
-
-<<<<<<< HEAD
 ## ▶️ Como Rodar o Projeto
 
 ### Pré-requisitos
@@ -119,6 +116,3 @@ Os comentários no código-fonte foram mantidos como material de estudo e para f
 👨‍💻 Desenvolvido por
 
 Maurício Filadelfo Filho
-=======
-Mauricio Filadelfo Filho
->>>>>>> e826cc7 (feat: implementa interface web com diagrama interativo de braço de guitarra)
