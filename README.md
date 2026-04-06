@@ -12,6 +12,8 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 - Diagrama interativo de 6 cordas e 24 trastes com tonica destacada.
 - Conversao de notacao com sustenidos e bemois conforme a tonalidade.
 
+![Preview da Interface Web](docs/images/tela_escalator.png)
+
 ## Estrutura
 
 - `src/main/java/br/com/escalator/model`
