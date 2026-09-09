@@ -2,6 +2,7 @@ package br.com.escalator.web;
 
 import br.com.escalator.model.Escala;
 import br.com.escalator.model.Nota;
+import br.com.escalator.service.GeradorDeAlphaTex;
 import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
 import org.springframework.stereotype.Service;
@@ -59,18 +60,19 @@ public class EscalatorWebService {
                 List<String> triades = geradorDePadroes.gerarTriades(notasDaEscala, modoNome).stream()
                         .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
                         .toList();
-                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "");
+                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "", "");
             }
             case "3" -> {
                 String[] tab3Npc = GeradorDeTablatura.gerar(tonicaFinal.toString(), modoNome);
                 String tablatura = String.join(System.lineSeparator(), tab3Npc);
-                yield new ResultadoEstudo(titulo, notasFormatadas, "3 Notas por Corda", List.of(), tablatura);
+                String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonicaFinal.toString(), modoNome);
+                yield new ResultadoEstudo(titulo, notasFormatadas, "3 Notas por Corda", List.of(), tablatura, alphaTex);
             }
             default -> {
                 List<String> sequencia = geradorDePadroes.gerarSequencia(notasDaEscala, 3).stream()
                         .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
                         .toList();
-                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "");
+                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "", "");
             }
         };
     }

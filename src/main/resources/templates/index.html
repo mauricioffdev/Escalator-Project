@@ -113,7 +113,7 @@
                         <h1 class="display-6 mb-1">Escalator Web Lab</h1>
                         <p class="subtitle mb-0">Gere estudos de escala, tríades e tablatura sem perder legibilidade.</p>
                     </div>
-                    <span class="badge text-bg-light px-3 py-2">Thymeleaf + Bootstrap</span>
+                    <span class="badge text-bg-light px-3 py-2">By: Mauricio Filadelfo Filho</span>
                 </div>
 
                 <div class="card mt-4 bg-dark text-light border-0">
@@ -163,10 +163,11 @@
                     <h2 class="h4 mb-3" th:text="${resultado.titulo}"></h2>
 
                     <p class="mb-2"><strong>Notas:</strong> <span id="notas-resultado" th:text="${resultado.notasFormatadas}"></span></p>
+                    <p class="mb-2"><strong>Tonica atual:</strong> <span id="tonica-atual">-</span></p>
                     <p class="mb-3"><strong>Padrão escolhido:</strong> <span th:text="${resultado.nomePadrao}"></span></p>
 
-                    <div th:if="${resultado.tablaturaFormatada != ''}" class="tab-box">
-                        <pre class="tablatura" th:text="${resultado.tablaturaFormatada}"></pre>
+                    <div th:if="${resultado.tablaturaAlphaTex != null and !resultado.tablaturaAlphaTex.isEmpty()}" class="tab-box alphatab-box">
+                        <div id="alphaTabSurface"></div>
                     </div>
 
                     <ul th:if="${!resultado.linhasSaida.isEmpty()}" class="list-group list-group-flush">
@@ -177,6 +178,84 @@
         </div>
     </section>
 </main>
+
+<!-- Exposicao do AlphaTex gerado no backend para o JavaScript (Thymeleaf escapa como string JS) -->
+<script th:inline="javascript">
+    (function () {
+        // Vazio/nulo => a pagina nao renderiza a tablatura visual (compatibilidade)
+        window.alphaTabTex = [[${resultado != null && resultado.tablaturaAlphaTex != null ? resultado.tablaturaAlphaTex : ''}]];
+    })();
+</script>
+
+<!-- AlphaTab via ESM (CDN oficial) - inicializa HORIZONTAL do score + player. 
+     useWorkers:false evita problemas de Web Worker em cross-origin (CDN). -->
+<script type="module">
+    import * as alphaTab from "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/alphaTab.min.mjs";
+
+    const alphaTabTex = window.alphaTabTex;
+    const surfaceAlphaTab = document.getElementById("alphaTabSurface");
+
+    function alphaTabErro(detalhe) {
+        console.error("AlphaTab falhou:", detalhe);
+        const msg = document.createElement("div");
+        msg.className = "alphatab-erro";
+        msg.textContent = "Nao foi possivel renderizar a tablatura (AlphaTab). " + detalhe;
+        surfaceAlphaTab.appendChild(msg);
+    }
+
+    if (!alphaTabTex || !surfaceAlphaTab) {
+        console.warn("AlphaTab: AlphaTex vazio - tablatura visual ignorada.");
+    } else {
+        try {
+            const api = new alphaTab.AlphaTabApi(surfaceAlphaTab, {
+                core: {
+                    useWorkers: false,
+                    fontDirectory: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/font/"
+                },
+                display: {
+                    scale: 1.25,
+                    justifyLastSystem: true,
+                    resources: {
+                        mainGlyphColor: "#e8f1fa",
+                        secondaryGlyphColor: "#7e93a6",
+                        scoreInfoColor: "#8fb0c9",
+                        staffLineColor: "#3d4f61",
+                        barSeparatorColor: "#3d4f61",
+                        barNumberColor: "#8fb0c9"
+                    }
+                },
+                player: {
+                    soundFont: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/soundfont/sonivox.sf2"
+                }
+            });
+
+            api.scoreLoaded.on(score => {
+                score.stylesheet.hideDynamics = true;
+                console.info("AlphaTab: score carregado.");
+            });
+
+            api.renderFinished.on(() => {
+                const rows = surfaceAlphaTab.querySelectorAll(".at-surface > div");
+                for (let i = rows.length - 1; i >= 0; i--) {
+                    const h = parseFloat(rows[i].style.height) || 0;
+                    if (h > 0 && h <= 16) {
+                        rows[i].parentNode.removeChild(rows[i]);
+                    } else {
+                        break;
+                    }
+                }
+            });
+
+            api.error.on(err => {
+                alphaTabErro(err && err.message ? err.message : String(err));
+            });
+
+            api.tex(alphaTabTex);
+        } catch (e) {
+            alphaTabErro("Excecao no init: " + (e && e.message ? e.message : String(e)));
+        }
+    }
+</script>
 
 <!-- NOVA Lógica do JavaScript (Lê a Tablatura) -->
 <script>
@@ -216,6 +295,16 @@
         const escalaNormalizada = notasCapturadas.map(normalizarNota).filter(Boolean);
 
         return [...new Set(escalaNormalizada)];
+    }
+
+    function extrairPrimeiraNotaDaTela() {
+        const spanNotas = document.getElementById("notas-resultado");
+        if (!spanNotas || !spanNotas.innerText) {
+            return "";
+        }
+
+        const notasCapturadas = spanNotas.innerText.match(/[A-G](?:#|b)?/g) || [];
+        return notasCapturadas.length > 0 ? notasCapturadas[0] : "";
     }
 
     function extrairCoordenadasDaTablatura() {
@@ -293,9 +382,19 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const selectTonica = document.getElementById("tonica");
-        const tonica = normalizarNota(selectTonica ? selectTonica.value : "C");
         const escalaAtiva = extrairEscalaDaTela();
-        const coordenadasDoShape = extrairCoordenadasDaTablatura();
+        const tonicaDaEscalaOriginal = extrairPrimeiraNotaDaTela();
+        const tonicaDaEscala = normalizarNota(tonicaDaEscalaOriginal);
+        const tonicaSelecionada = normalizarNota(selectTonica ? selectTonica.value : "C");
+        const tonica = tonicaDaEscala || tonicaSelecionada;
+        const tonicaDisplay = tonicaDaEscalaOriginal || (selectTonica ? selectTonica.value : "C");
+        const spanTonicaAtual = document.getElementById("tonica-atual");
+
+        if (spanTonicaAtual) {
+            spanTonicaAtual.innerText = tonicaDisplay;
+        }
+
+const coordenadasDoShape = extrairCoordenadasDaTablatura();
         const mostrarEscalaCompleta = coordenadasDoShape.length === 0;
 
         desenharBracoDaGuitarra(coordenadasDoShape, tonica, escalaAtiva, mostrarEscalaCompleta);

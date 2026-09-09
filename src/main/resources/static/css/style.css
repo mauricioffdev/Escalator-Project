@@ -76,3 +76,55 @@ body {
     background: transparent;
     font-family: "IBM Plex Mono", monospace;
 }
+
+/* --- AlphaTab (tablatura visual) --- */
+.alphatab-box {
+    padding: 0.25rem 0.5rem 0.5rem;
+}
+
+#alphaTabSurface {
+    min-height: 120px;
+    color: #d8e7f5;
+}
+
+#alphaTabSurface .at-surface {
+    overflow-x: auto;
+    padding-top: 0.25rem;
+}
+
+#alphaTabSurface canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+.alphatab-erro {
+    color: #ffb8a0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.85rem;
+    padding: 0.75rem;
+}
+
+/* Player bar escura (play/pause, loop, tempo) consistente com o tema "metal" */
+.at-player {
+    background: #0f1720 !important;
+    color: #d8e7f5 !important;
+    border-bottom: 1px solid #283746 !important;
+}
+
+.at-player button {
+    color: #d8e7f5 !important;
+}
+
+.at-player button:hover {
+    color: #17a2b8 !important;
+}
+
+.at-player select {
+    background: #1c2a3a !important;
+    color: #d8e7f5 !important;
+    border: 1px solid #283746 !important;
+}
+
+#alphaTabSurface .at-player input[type="range"] {
+    filter: invert(0.75) hue-rotate(180deg);
+}

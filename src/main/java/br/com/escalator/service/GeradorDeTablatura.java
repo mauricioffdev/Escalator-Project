@@ -1,5 +1,6 @@
 package br.com.escalator.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,17 @@ public class GeradorDeTablatura {
             this.notasPorCorda = notas;
             this.comprimentoLinha = comprimento;
         }
+    }
+
+    /**
+     * Uma nota pronta para consumo na ordem melódica, já com a numeração de
+     * corda do AlphaTab (1 = E aguda, 6 = E grave) e o traste final (shape +
+     * transposição).
+     */
+    public record NotaTablatura(int corda, int traste) {
+    }
+
+    private record Transposicao(ShapeMestre shape, int shift) {
     }
 
     private static final ShapeMestre SHAPE_3NPC_MAIOR_TRANSPOABLE;
@@ -69,6 +81,42 @@ public class GeradorDeTablatura {
     }
 
     public static String[] gerar(String tonicaAlvo, String modoNome) {
+        Transposicao transposicao = resolverTransposicao(tonicaAlvo, modoNome);
+        if (transposicao == null) {
+            return new String[]{"Tonalidade invalida para transposicao: " + tonicaAlvo};
+        }
+        return montarTablatura(transposicao.shape, transposicao.shift);
+    }
+
+    /**
+     * Retorna as notas do shape "3 notas por corda" na ordem melódica
+     * ascendente (da corda 6/E grave para a corda 1/E aguda), para que
+     * bibliotecas como o AlphaTab possam tocar/renderizar o estudo.
+     */
+    public static List<NotaTablatura> gerarNotas(String tonicaAlvo, String modoNome) {
+        Transposicao transposicao = resolverTransposicao(tonicaAlvo, modoNome);
+        if (transposicao == null) {
+            return List.of();
+        }
+
+        // O shape do braco guarda as notas por corda usando os nomes ASCII
+        // (E_high..E_low). AlphaTab numera as cordas de 1 (aguda) ate 6 (grave),
+        // entao o indice 0 (E_high) vira corda 1 e o indice 5 (E_low) vira corda 6.
+        String[] nomesCordas = {"E_high", "B", "G", "D", "A", "E_low"};
+        List<NotaTablatura> notas = new ArrayList<>();
+        for (int i = nomesCordas.length - 1; i >= 0; i--) {
+            List<NotaTab> notasDaCorda = transposicao.shape.notasPorCorda.get(nomesCordas[i]);
+            if (notasDaCorda == null) {
+                continue;
+            }
+            for (NotaTab nota : notasDaCorda) {
+                notas.add(new NotaTablatura(i + 1, nota.fret + transposicao.shift));
+            }
+        }
+        return notas;
+    }
+
+    private static Transposicao resolverTransposicao(String tonicaAlvo, String modoNome) {
         ShapeMestre shapeBase;
         int casaTonicaMestre;
 
@@ -83,15 +131,14 @@ public class GeradorDeTablatura {
         }
 
         if (!NOTAS_NA_CORDA_E.containsKey(tonicaNormalizada)) {
-            return new String[]{"Tonalidade invalida para transposicao: " + tonicaAlvo};
+            return null;
         }
 
         int casaTonicaAlvo = NOTAS_NA_CORDA_E.get(tonicaNormalizada);
         if (casaTonicaAlvo < LIMIAR_OITAVACAO_CORDA_GRAVE) {
             casaTonicaAlvo += OITAVA;
         }
-        int shift = casaTonicaAlvo - casaTonicaMestre;
-        return montarTablatura(shapeBase, shift);
+        return new Transposicao(shapeBase, casaTonicaAlvo - casaTonicaMestre);
     }
 
     private static String[] montarTablatura(ShapeMestre shape, int shift) {

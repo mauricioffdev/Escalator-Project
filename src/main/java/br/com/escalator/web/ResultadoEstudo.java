@@ -7,6 +7,7 @@ public record ResultadoEstudo(
         String notasFormatadas,
         String nomePadrao,
         List<String> linhasSaida,
-        String tablaturaFormatada
+        String tablaturaFormatada,
+        String tablaturaAlphaTex
 ) {
 }

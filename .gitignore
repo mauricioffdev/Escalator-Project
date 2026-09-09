@@ -6,12 +6,14 @@ target/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
+.idea/dbnavigator.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
 *.iws
 *.iml
 *.ipr
+resumo-*.md
 
 ### Eclipse ###
 .apt_generated
