@@ -13,7 +13,7 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 - Conversao de notacao com sustenidos e bemois conforme a tonalidade.
 - Partitura e tablatura interativa renderizadas no navegador com AlphaTab (tercinas em 3/4, armadura de clave e reproducao de audio).
 
-## 🎵 Visualização interativa com AlphaTab
+## Visualização interativa com AlphaTab
 
 A aplicação renderiza **partituras e tablaturas geradas** diretamente no navegador por meio do [AlphaTab](https://www.alphatab.net/), uma biblioteca de renderização musical em JavaScript. A conversão das notas do estudo para o formato **AlphaTex** é feita pela classe `GeradorDeAlphaTex`, exibida na interface web dentro de um quadro interativo com player embutido.
 
@@ -48,7 +48,7 @@ A aplicação renderiza **partituras e tablaturas geradas** diretamente no naveg
 - Maven
 - AlphaTab (renderização de partituras/tablaturas no navegador)  
 
-## ▶️ Como Rodar o Projeto
+## Como Rodar o Projeto
 
 ### Pré-requisitos
 
@@ -76,7 +76,7 @@ Certifique-se de ter o **JDK (Java Development Kit)** instalado em sua máquina.
 
 ---
 
-## 📂 Estrutura do Código
+## Estrutura do Código
 
 O projeto segue a arquitetura de pacotes padrão Java (`br.com.escalator`):
 
@@ -91,7 +91,7 @@ O projeto segue a arquitetura de pacotes padrão Java (`br.com.escalator`):
 
 ---
 
-## 🧪 Exemplo de Saída
+## Exemplo de Saída
 
 ```text
 --- Escalator: Gerador de Padrões de Guitarra (Escalas Diatônicas) ---
@@ -129,11 +129,11 @@ E |--3--5--7--------------------|-----------------------------|
 -------------------------------------------
 Pressione ENTER para escolher outra escala ou digite 'Sair'.
 
-💡 Observação
+Observação
 
 Este projeto foi feito com a ajuda do Gemini para resolver erros e implementar a lógica de forma otimizada. 
 Os comentários no código-fonte foram mantidos como material de estudo e para facilitar o entendimento de cada etapa.
 
-👨‍💻 Desenvolvido por
+Desenvolvido por
 
 Maurício Filadelfo Filho
