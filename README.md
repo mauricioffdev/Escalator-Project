@@ -11,6 +11,25 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 - Padrao 3 notas por corda com saida em tablatura.
 - Diagrama interativo de 6 cordas e 24 trastes com tonica destacada.
 - Conversao de notacao com sustenidos e bemois conforme a tonalidade.
+- Partitura e tablatura interativa renderizadas no navegador com AlphaTab (tercinas em 3/4, armadura de clave e reproducao de audio).
+
+## 🎵 Visualização interativa com AlphaTab
+
+A aplicação renderiza **partituras e tablaturas geradas** diretamente no navegador por meio do [AlphaTab](https://www.alphatab.net/), uma biblioteca de renderização musical em JavaScript. A conversão das notas do estudo para o formato **AlphaTex** é feita pela classe `GeradorDeAlphaTex`, exibida na interface web dentro de um quadro interativo com player embutido.
+
+### Recursos suportados
+
+- **Tablatura visual interativa**: as notas do padrão "3 notas por corda" são convertidas automaticamente para partitura/tablatura com trastes e cordas numerados.
+- **Ritmo com tercinas em 3/4**: as notas são renderizadas como colcheias em tercina (`:8 { tu 3 }`), totalizando 9 notas por compasso na fórmula de compasso 3/4 (`\ts 3 4`).
+- **Armadura de clave**: a tonalidade selecionada define a armadura (`\ks`, ex.: `C`, `F#`, `Bb`, `Aminor`), aplicando os acidentes corretos na partitura sem sustenidos/bemóis inline.
+- **Reprodução de áudio (MIDI)**: o player do AlphaTab permite ouvir o exercício com som de guitarra (soundfont), controlando reprodução, pausa e posição.
+
+### Como visualizar e interagir
+
+1. Inicie a aplicação web e acesse `http://localhost:8080`.
+2. Selecione a **tônica** e o **modo** (maior ou menor) desejados.
+3. Escolha o padrão **3 notas por corda** e gere o estudo.
+4. A partitura/tablatura aparece no quadro AlphaTab; use os controles do player para **ouvir o exercício** ou role/renderize o score conforme a largura da tela.
 
 ## Estrutura
 
@@ -26,7 +45,8 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 - Spring Boot
 - Thymeleaf
 - Bootstrap
-- Maven  
+- Maven
+- AlphaTab (renderização de partituras/tablaturas no navegador)  
 
 ## ▶️ Como Rodar o Projeto
 
@@ -67,6 +87,7 @@ O projeto segue a arquitetura de pacotes padrão Java (`br.com.escalator`):
 |  | `Escala.java` | Define a estrutura de uma escala (seus intervalos) e calcula as notas reais. |
 | `br.com.escalator.service` | `GeradorDePadroes.java` | Contém a lógica de treino: geração de sequências de N notas e sequência de tríades. |
 |  | `GeradorDeTablatura.java` | Gera a visualização da escala maior ou menor em formato de **tablatura para guitarra**, respeitando as posições por corda e traste. Ideal para estudo visual da escala. |
+|  | `GeradorDeAlphaTex.java` | Converte as notas geradas para a sintaxe **AlphaTex** consumida pelo AlphaTab (tercinas 3/4, armadura de clave e renderização no navegador). |
 
 ---
 
