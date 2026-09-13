@@ -5,6 +5,8 @@ import java.util.List;
 
 public class Escala {
     public static final Escala MAIOR = new Escala("Maior", new int[]{0, 2, 4, 5, 7, 9, 11});
+    public static final Escala PENTATONICA_M7 = new Escala("Pentatonica m7", new int[]{0, 3, 5, 7, 10});
+    public static final Escala PENTATONICA_BLUES = new Escala("Pentatonica Blues", new int[]{0, 3, 5, 6, 7, 10});
 
     private final String nome;
     private final int[] intervalos;

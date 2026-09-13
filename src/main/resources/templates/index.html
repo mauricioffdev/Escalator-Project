@@ -133,13 +133,15 @@
                         <select id="modo" name="modo" class="form-select">
                             <option value="1" th:selected="${modoSelecionado == '1'}">Escala Maior</option>
                             <option value="2" th:selected="${modoSelecionado == '2'}">Menor Natural (Relativa)</option>
+                            <option value="3" th:selected="${modoSelecionado == '3'}">Pentatonica m7</option>
+                            <option value="4" th:selected="${modoSelecionado == '4'}">Pentatonica Blues</option>
                         </select>
                     </div>
 
                     <div class="col-12 col-md-3">
-                        <label for="tonica" class="form-label">Tônica base</label>
+                        <label for="tonica" class="form-label" th:text="${rotuloTonica}">Tônica (menor/maior)</label>
                         <select id="tonica" name="tonica" class="form-select">
-                            <option th:each="nota : ${tonicas}" th:value="${nota}" th:text="${nota}" th:selected="${nota == tonicaSelecionada}"></option>
+                            <option th:each="opt : ${tonicas}" th:value="${opt.valor}" th:text="${opt.rotulo}" th:selected="${opt.valor == tonicaSelecionada}"></option>
                         </select>
                     </div>
 
