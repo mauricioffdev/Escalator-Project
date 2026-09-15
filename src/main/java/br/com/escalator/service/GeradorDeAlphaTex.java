@@ -75,10 +75,6 @@ public class GeradorDeAlphaTex {
 
         StringBuilder tex = new StringBuilder();
         tex.append("\\title \"").append(escapar(titulo)).append("\"\n");
-        String subtitulo = subtituloPara(modoNome, config);
-        if (subtitulo != null) {
-            tex.append("\\subtitle \"").append(subtitulo).append("\"\n");
-        }
         tex.append(TUNING);
         tex.append("\\ts ").append(config.compasso()).append('\n');
         tex.append("\\ks ").append(nomeArmaduraPara(tonicaAlvo, modoNome)).append('\n');
@@ -155,19 +151,6 @@ public class GeradorDeAlphaTex {
         Nota menor = Nota.valueOf(tonica.replace("#", "_SHARP"));
         Nota maior = Nota.getNotaPorValor(menor.getValor() + 3);
         return nomeArmadura(maior.toString(), false);
-    }
-
-    /**
-     * Subtítulo apenas para os modos de shape padronizado (ex.: "3 notas por
-     * corda"). As pentatônicas não exibem subtítulo, pois o tom já aparece no
-     * título em forma de acorde menor (ex.: "Pentatonica de Am").
-     */
-    private static String subtituloPara(String modoNome, ConfiguracaoEstudo config) {
-        if (GeradorDeTablatura.MODO_PENTATONICA_M7.equals(modoNome)
-                || GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)) {
-            return null;
-        }
-        return config.legenda();
     }
 
     private static String escapar(String texto) {
