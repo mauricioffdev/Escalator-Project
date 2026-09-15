@@ -96,7 +96,7 @@ public class EscalatorWebService {
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "", "");
             }
             case "3" -> {
-                String nomePadrao = isPentatonica ? "Shape " + modoNome : "3 Notas por Corda";
+                String nomePadrao = "Shapes-Tab";
                 String[] tab3Npc = GeradorDeTablatura.gerar(tonicaFinal.toString(), modoNome);
                 String tablatura = String.join(System.lineSeparator(), tab3Npc);
                 String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonicaFinal.toString(), modoNome);

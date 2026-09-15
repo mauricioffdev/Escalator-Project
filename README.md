@@ -8,7 +8,7 @@ Aplicacao para geracao de padroes de estudo musical para guitarra, com foco em e
 
 - Escala maior e menor natural (relativa).
 - Sequencia de 3 notas e triades diatonicas.
-- Padrao 3 notas por corda com saida em tablatura.
+- Padrao Shapes-Tab (shapes por corda) com saida em tablatura.
 - Diagrama interativo de 6 cordas e 24 trastes com tonica destacada.
 - Conversao de notacao com sustenidos e bemois conforme a tonalidade.
 - Partitura e tablatura interativa renderizadas no navegador com AlphaTab (tercinas em 3/4, armadura de clave e reproducao de audio).
@@ -19,7 +19,7 @@ A aplicação renderiza **partituras e tablaturas geradas** diretamente no naveg
 
 ### Recursos suportados
 
-- **Tablatura visual interativa**: as notas do padrão "3 notas por corda" são convertidas automaticamente para partitura/tablatura com trastes e cordas numerados.
+- **Tablatura visual interativa**: as notas do padrão **Shapes-Tab** são convertidas automaticamente para partitura/tablatura com trastes e cordas numerados.
 - **Ritmo com tercinas em 3/4**: as notas são renderizadas como colcheias em tercina (`:8 { tu 3 }`), totalizando 9 notas por compasso na fórmula de compasso 3/4 (`\ts 3 4`).
 - **Armadura de clave**: a tonalidade selecionada define a armadura (`\ks`, ex.: `C`, `F#`, `Bb`, `Aminor`), aplicando os acidentes corretos na partitura sem sustenidos/bemóis inline.
 - **Reprodução de áudio (MIDI)**: o player do AlphaTab permite ouvir o exercício com som de guitarra (soundfont), controlando reprodução, pausa e posição.
@@ -28,7 +28,7 @@ A aplicação renderiza **partituras e tablaturas geradas** diretamente no naveg
 
 1. Inicie a aplicação web e acesse `http://localhost:8080`.
 2. Selecione a **tônica** e o **modo** (maior ou menor) desejados.
-3. Escolha o padrão **3 notas por corda** e gere o estudo.
+3. Escolha o padrão **Shapes-Tab** e gere o estudo.
 4. A partitura/tablatura aparece no quadro AlphaTab; use os controles do player para **ouvir o exercício** ou role/renderize o score conforme a largura da tela.
 
 ## Estrutura
@@ -112,13 +112,13 @@ Digite a Tônica MAIOR (ex: C, Bb, A) ou 'Sair': G
 Opções de Padrão para G Maior:
 1 - Padrão Sequência de 3 Notas
 2 - Sequência de Tríades (Campo Harmônico)
-3 - 3 Notas por Corda (Tablatura)
+3 - Shapes-Tab
 Escolha uma opção: 3
 
 ----------------- Saída para G Maior -----------------
 Notas: [G, A, B, C, D, E, F#]
 
-PADRÃO ESCOLHIDO: 3 Notas por Corda
+PADRÃO ESCOLHIDO: Shapes-Tab
 E |-----------------------------|---------------------5--7--8-|
 B |-----------------------------|-----------5--7--8-----------|
 G |-----------------------------|--4--5--7--------------------|

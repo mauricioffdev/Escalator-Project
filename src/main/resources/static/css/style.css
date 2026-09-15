@@ -128,3 +128,47 @@ body {
 #alphaTabSurface .at-player input[type="range"] {
     filter: invert(0.75) hue-rotate(180deg);
 }
+
+/* Barra de controle do player (fora do scroll horizontal da tab) */
+.at-player {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.at-player .btn-outline-light {
+    border-color: #3d4f61;
+    font-size: 0.85rem;
+}
+
+.at-player .btn.active,
+.at-player .btn-outline-light:hover {
+    background: #17a2b8;
+    border-color: #17a2b8;
+    color: #fff;
+}
+
+#playerProgress {
+    color: #8fb0c9;
+}
+
+/* Cursor de acompanhamento da reproducao (estilo Guitar Pro: sem tarja colorida,
+   apenas uma linha neutra sutil e notas com brilho azulado leve). */
+#alphaTabSurface .at-cursor-bar {
+    background: transparent;
+}
+
+#alphaTabSurface .at-cursor-bar:hover {
+    background: transparent;
+}
+
+#alphaTabSurface .at-cursor-beat {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.25);
+}
+
+/* Notas em execucao destacadas com tom claro (sem o verde anterior) */
+#alphaTabSurface .at-highlight * {
+    fill: #8fd3ff;
+    stroke: #8fd3ff;
+}

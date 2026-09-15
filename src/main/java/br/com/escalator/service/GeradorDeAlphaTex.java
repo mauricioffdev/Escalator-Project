@@ -119,7 +119,7 @@ public class GeradorDeAlphaTex {
             case GeradorDeTablatura.MODO_PENTATONICA_BLUES ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_BLUES, COMPASSO_4_4, " r.8");
             default ->
-                    new ConfiguracaoEstudo("3 notas por corda", DURACAO_TERCINA, "", NOTAS_POR_COMPASSO, COMPASSO_3_4, "");
+                    new ConfiguracaoEstudo("Shapes-Tab", DURACAO_TERCINA, "", NOTAS_POR_COMPASSO, COMPASSO_3_4, "");
         };
     }
 

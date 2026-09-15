@@ -150,7 +150,7 @@
                         <select id="padrao" name="padrao" class="form-select">
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
                             <option value="2" th:selected="${padraoSelecionado == '2'}">Sequência de tríades</option>
-                            <option value="3" th:selected="${padraoSelecionado == '3'}">3 notas por corda</option>
+                            <option value="3" th:selected="${padraoSelecionado == '3'}">Shapes-Tab</option>
                         </select>
                     </div>
 
@@ -168,8 +168,25 @@
                     <p class="mb-2"><strong>Tonica atual:</strong> <span id="tonica-atual">-</span></p>
                     <p class="mb-3"><strong>Padrão escolhido:</strong> <span th:text="${resultado.nomePadrao}"></span></p>
 
-                    <div th:if="${resultado.tablaturaAlphaTex != null and !resultado.tablaturaAlphaTex.isEmpty()}" class="tab-box alphatab-box">
-                        <div id="alphaTabSurface"></div>
+                    <div th:if="${resultado.tablaturaAlphaTex != null and !resultado.tablaturaAlphaTex.isEmpty()}">
+                        <div class="at-player d-flex align-items-center gap-2 px-2 py-2 flex-wrap mb-2" id="alphaTabControls" style="display: none;">
+                            <button type="button" id="btnPlayPause" class="btn btn-sm btn-outline-light" disabled>Play</button>
+                            <button type="button" id="btnStop" class="btn btn-sm btn-outline-light" disabled>Parar</button>
+                            <button type="button" id="btnMetronome" class="btn btn-sm btn-outline-light" title="Liga/desliga o metronomo" disabled>Metronomo</button>
+                            <button type="button" id="btnLoop" class="btn btn-sm btn-outline-light" title="Repete o estudo em loop" disabled>Loop</button>
+                            <label class="small mb-0 ms-2" for="playerTempo">Tempo:</label>
+                            <select id="playerTempo" class="form-select form-select-sm w-auto" aria-label="Velocidade do audio" disabled>
+                                <option value="0.5">50%</option>
+                                <option value="0.75" selected>75% (lento)</option>
+                                <option value="1">100%</option>
+                                <option value="1.25">125%</option>
+                                <option value="1.5">150%</option>
+                            </select>
+                            <span id="playerProgress" class="at-player-progress ms-auto small font-monospace">00:00 / 00:00</span>
+                        </div>
+                        <div class="tab-box alphatab-box">
+                            <div id="alphaTabSurface"></div>
+                        </div>
                     </div>
 
                     <ul th:if="${!resultado.linhasSaida.isEmpty()}" class="list-group list-group-flush">
@@ -186,6 +203,8 @@
     (function () {
         // Vazio/nulo => a pagina nao renderiza a tablatura visual (compatibilidade)
         window.alphaTabTex = [[${resultado != null && resultado.tablaturaAlphaTex != null ? resultado.tablaturaAlphaTex : ''}]];
+        // Pentatonicas (modos 3 e 4) usam tab maior; escalas maiores/menores usam o tamanho original
+        window.tabScale = [[${resultado != null and (modoSelecionado == '3' or modoSelecionado == '4')}]] ? 1.5 : 1.25;
     })();
 </script>
 
@@ -205,6 +224,35 @@
         surfaceAlphaTab.appendChild(msg);
     }
 
+    function formatarTempo(ms) {
+        if (!ms || ms < 0) {
+            return "00:00";
+        }
+        const totalSeg = Math.floor(ms / 1000);
+        const min = Math.floor(totalSeg / 60);
+        const seg = totalSeg % 60;
+        return String(min).padStart(2, "0") + ":" + String(seg).padStart(2, "0");
+    }
+
+    const playerBotoes = {
+        barra: document.getElementById("alphaTabControls"),
+        playPause: document.getElementById("btnPlayPause"),
+        stop: document.getElementById("btnStop"),
+        metronome: document.getElementById("btnMetronome"),
+        loop: document.getElementById("btnLoop"),
+        tempo: document.getElementById("playerTempo"),
+        progresso: document.getElementById("playerProgress")
+    };
+
+    function atualizarBotoes(state) {
+        if (!playerBotoes.playPause) {
+            return;
+        }
+        const tocando = state === alphaTab.synth.PlayerState.Playing;
+        playerBotoes.playPause.textContent = tocando ? "Pausar" : "Play";
+        playerBotoes.playPause.classList.toggle("active", tocando);
+    }
+
     if (!alphaTabTex || !surfaceAlphaTab) {
         console.warn("AlphaTab: AlphaTex vazio - tablatura visual ignorada.");
     } else {
@@ -215,7 +263,7 @@
                     fontDirectory: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/font/"
                 },
                 display: {
-                    scale: 1.25,
+                    scale: window.tabScale || 1.25,
                     justifyLastSystem: true,
                     resources: {
                         mainGlyphColor: "#e8f1fa",
@@ -227,6 +275,11 @@
                     }
                 },
                 player: {
+                    enablePlayer: true,
+                    playerMode: alphaTab.PlayerMode.EnabledSynthesizer,
+                    enableCursor: true,
+                    enableAnimatedBeatCursor: true,
+                    enableElementHighlighting: true,
                     soundFont: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/soundfont/sonivox.sf2"
                 }
             });
@@ -238,14 +291,71 @@
 
             api.renderFinished.on(() => {
                 const rows = surfaceAlphaTab.querySelectorAll(".at-surface > div");
+                // Remove a linha final "rendered by alphaTab" (altura ~12px * escala) que o
+                // AlphaTab adiciona como rodape; com escala maior ela ultrapassava 16px.
+                const alturaRodape = 12 * (window.tabScale || 1.25) + 4;
                 for (let i = rows.length - 1; i >= 0; i--) {
                     const h = parseFloat(rows[i].style.height) || 0;
-                    if (h > 0 && h <= 16) {
+                    if (h > 0 && h <= alturaRodape) {
                         rows[i].parentNode.removeChild(rows[i]);
                     } else {
                         break;
                     }
                 }
+            });
+
+            api.playerReady.on(() => {
+                playerBotoes.barra.style.display = "flex";
+                playerBotoes.playPause.disabled = false;
+                playerBotoes.stop.disabled = false;
+                playerBotoes.metronome.disabled = false;
+                playerBotoes.loop.disabled = false;
+                playerBotoes.tempo.disabled = false;
+                api.playbackSpeed = parseFloat(playerBotoes.tempo.value);
+                playerBotoes.loop.classList.toggle("active", api.isLooping);
+                atualizarBotoes(api.playerState);
+            });
+
+            api.playerStateChanged.on(args => {
+                atualizarBotoes(args.state);
+            });
+
+            api.playerPositionChanged.on(args => {
+                playerBotoes.progresso.textContent =
+                    formatarTempo(args.currentTime) + " / " + formatarTempo(args.endTime);
+            });
+
+            api.playerFinished.on(() => {
+                // Em loop (`api.isLooping`), o AlphaTab dispara "finished" no fim de cada
+                // volta e continua tocando; so paramos quando o loop esta DESLIGADO.
+                if (!api.isLooping) {
+                    api.stop();
+                    atualizarBotoes(alphaTab.synth.PlayerState.Paused);
+                }
+            });
+
+            playerBotoes.playPause.addEventListener("click", () => {
+                api.playPause();
+            });
+
+            playerBotoes.stop.addEventListener("click", () => {
+                api.stop();
+                atualizarBotoes(alphaTab.synth.PlayerState.Paused);
+            });
+
+            playerBotoes.metronome.addEventListener("click", () => {
+                const ligado = api.metronomeVolume > 0;
+                api.metronomeVolume = ligado ? 0 : 0.8;
+                playerBotoes.metronome.classList.toggle("active", !ligado);
+            });
+
+            playerBotoes.loop.addEventListener("click", () => {
+                api.isLooping = !api.isLooping;
+                playerBotoes.loop.classList.toggle("active", api.isLooping);
+            });
+
+            playerBotoes.tempo.addEventListener("change", () => {
+                api.playbackSpeed = parseFloat(playerBotoes.tempo.value);
             });
 
             api.error.on(err => {

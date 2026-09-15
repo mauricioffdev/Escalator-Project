@@ -93,7 +93,7 @@ public class App {
             System.out.println("Opções de Padrão para " + nomeExibicaoTonicaFinal + " " + modoNome + ":");
             System.out.println("1 - Padrão Sequência de 3 Notas");
             System.out.println("2 - Sequência de Tríades (Campo Harmônico)");
-            System.out.println("3 - 3 Notas por Corda (Tablatura)");
+            System.out.println("3 - Shapes-Tab");
             System.out.print("Escolha uma opção: ");
             String opcao = scanner.nextLine();
 
@@ -114,7 +114,7 @@ public class App {
                     break;
                 case "3":
                     String[] tab3Npc = GeradorDeTablatura.gerar(tonicaFinal.toString(), modoNome);
-                    imprimirTablatura("3 Notas por Corda", tab3Npc);
+                    imprimirTablatura("Shapes-Tab", tab3Npc);
                     break;
                 default:
                     System.out.println("Opção de padrão inválida. Exibindo apenas a escala.");
