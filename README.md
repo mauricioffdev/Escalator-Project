@@ -23,6 +23,8 @@ A aplicação renderiza **partituras e tablaturas geradas** diretamente no naveg
 - **Ritmo com tercinas em 3/4**: as notas são renderizadas como colcheias em tercina (`:8 { tu 3 }`), totalizando 9 notas por compasso na fórmula de compasso 3/4 (`\ts 3 4`).
 - **Armadura de clave**: a tonalidade selecionada define a armadura (`\ks`, ex.: `C`, `F#`, `Bb`, `Aminor`), aplicando os acidentes corretos na partitura sem sustenidos/bemóis inline.
 - **Reprodução de áudio (MIDI)**: o player do AlphaTab permite ouvir o exercício com som de guitarra (soundfont), controlando reprodução, pausa e posição.
+- **Player com cursor de leitura**: o acompanhamento segue a execução com cursor tipo Guitar Pro (linha neutra e notas tocadas em azul-claro), além de **loop contínuo** do exercício, **metrônomo** e **velocidade ajustável** (padrão 75%).
+- **Tamanho da tab por escala**: pentatônicas (m7 e blues) renderizam com tab maior; Escala Maior e Menor Natural usam o tamanho original.
 
 ### Como visualizar e interagir
 
