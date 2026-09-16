@@ -14,19 +14,22 @@ import java.util.List;
 * <li>Cada nota é descrita como <b>&lt;traste&gt;.&lt;corda&gt;</b>, ex.: {@code 9.4} =
      *       traste 9 na corda 4. As cordas seguem a numeração AlphaTab/cifra oficial:
  *       <b>1 = E aguda</b> ... <b>6 = E grave</b> (oposto do desenho ASCII).</li>
- *  <li>A ordem melódica vem de {@link GeradorDeTablatura#gerarNotas}, que já devolve
- *       as notas do grave (corda 6) ao agudo (corda 1), ou seja, o shape
- *       "3 notas por corda" ascendente que o usuário vê no ASCII.</li>
- *  <li>O estudo fica em <b>3/4</b> com <b>6 tercinas de colcheia</b> (1 por corda,
- *       3 por compasso): compasso 1 = cordas 6, 5 e 4; compasso 2 = cordas 3, 2 e 1.
- *       {@code :8 { tu 3 }} define a tercina; {@code |} separa os compassos.</li>
+ *  <li>A ordem melódica vem de {@link GeradorDeTablatura#gerarNotas}, que devolve a
+ *       <b>subida</b> do grave (corda 6) ao agudo (corda 1) seguida do <b>retorno</b>
+ *       pelo caminho inverso (corda 1 de volta à corda 6). O retorno repete a última
+ *       nota da subida e termina na primeira nota da escala, que é repetida quando o
+ *       player faz loop.</li>
+ *  <li>O estudo fica em <b>3/4</b> com <b>6 tercinas de colcheia</b> por volta
+ *       (1 por corda, 3 por compasso): compassos 1 e 2 = subida (cordas 6 a 1);
+ *       compassos 3 e 4 = retorno (cordas 1 a 6). {@code :8 { tu 3 }} define a
+ *       tercina; {@code |} separa os compassos.</li>
  *  <li>Além do shape "3 notas por corda" (padrão), a classe renderiza duas
  *       pentatônicas: <b>"pentatonica m7"</b> com estritamente 2 notas por
  *       corda em <b>semicolcheias</b> ({@code .16}, 12 por compasso 3/4) e
- *       <b>"pentatonica blues"</b> em <b>semicolcheias</b> no compasso 4/4,
- *       com as 14 notas em 3 grupos completos de 4 e, no último tempo, 2
- *       semicolcheias seguidas de uma pausa de colcheia ({@code r.8}).
- *       Nenhuma delas recebe sinais de dinâmica.</li>
+ *       <b>"pentatonica blues"</b> em <b>semicolcheias</b> no compasso 4/4.
+ *       Cada volta (ida e retorno) tem 14 notas em 3 grupos completos de 4 e,
+ *       no último tempo, 2 semicolcheias seguidas de uma pausa de colcheia
+ *       ({@code r.8}), que fecha cada compasso. Nenhuma dinâmica é adicionada.</li>
  *  <li>{@code \ts} fixa a fórmula de compasso de cada modo e {@code \ks} a armadura
  *       de clave do tom (acidentes só na armadura, sem sustenidos/bemóis inline
  *       nas notas).</li>
@@ -88,16 +91,17 @@ public class GeradorDeAlphaTex {
             tex.append(nota.traste()).append('.').append(nota.corda()).append(config.sufixoDuracao());
             notasNoCompasso++;
 
-            if (i < notas.size() - 1) {
-                if (notasNoCompasso == config.notasPorCompasso()) {
-                    tex.append(" |\n");
-                    notasNoCompasso = 0;
-                } else {
-                    tex.append(' ');
-                }
+            // A pausa final fecha cada compasso completo (não apenas o último),
+            // preservando a pausa do compasso de ida além do de volta (blues).
+            if (i == notas.size() - 1) {
+                tex.append(config.pausaFinal()).append(" |");
+            } else if (notasNoCompasso == config.notasPorCompasso()) {
+                tex.append(config.pausaFinal()).append(" |\n");
+                notasNoCompasso = 0;
+            } else {
+                tex.append(' ');
             }
         }
-        tex.append(config.pausaFinal()).append(" |");
         return tex.toString();
     }
 

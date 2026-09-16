@@ -119,9 +119,12 @@ public class GeradorDeTablatura {
     }
 
     /**
-     * Retorna as notas do shape "3 notas por corda" na ordem melódica
-     * ascendente (da corda 6/E grave para a corda 1/E aguda), para que
-     * bibliotecas como o AlphaTab possam tocar/renderizar o estudo.
+     * Retorna as notas do shape na ordem melódica: primeiro a subida da escala
+     * (da corda 6/E grave para a corda 1/E aguda) e, em seguida, o movimento de
+     * volta pelo caminho inverso (da corda 1/E aguda de volta para a corda 6/E
+     * grave). O retorno começa repetindo a última nota da subida (sua 1ª nota)
+     * e termina na primeira nota da escala, que é repetida quando o player faz
+     * loop, de modo que a volta emende direto na próxima subida.
      */
     public static List<NotaTablatura> gerarNotas(String tonicaAlvo, String modoNome) {
         Transposicao transposicao = resolverTransposicao(tonicaAlvo, modoNome);
@@ -143,6 +146,16 @@ public class GeradorDeTablatura {
                 notas.add(new NotaTablatura(i + 1, nota.fret + transposicao.shift));
             }
         }
+
+        // Movimento de volta: percorre a subida ao contrario. Como a 1a nota do
+        // retorno e a ultima nota da subida, a nota mais aguda fica repetida; e
+        // como a ultima nota do retorno e a 1a nota da escala, o loop tambem
+        // repete a nota mais grave ao recomecar.
+        List<NotaTablatura> retorno = new ArrayList<>(notas.size());
+        for (int i = notas.size() - 1; i >= 0; i--) {
+            retorno.add(notas.get(i));
+        }
+        notas.addAll(retorno);
         return notas;
     }
 
