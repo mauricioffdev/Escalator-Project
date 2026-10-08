@@ -34,23 +34,36 @@ public class EscalatorController {
             Model model
     ) {
         boolean maiorPrimeiro = "1".equals(modo);
+        // Menor harmonica nao tem relativo maior: o dropdown mostra so a tonica menor.
+        boolean somenteMenor = "5".equals(modo);
+        // Tonica enviada sem o relativo (dropdown da menor harmonica ou troca de
+        // modo): recupera o par correspondente para os demais modos.
+        String parTonica = tonica.contains("/") ? tonica : TONICAS.stream()
+                .filter(par -> par.split("/")[0].equals(tonica))
+                .findFirst()
+                .orElse(tonica);
         List<TonicaOpcao> tonicas = TONICAS.stream()
                 .map(par -> {
                     String[] partes = par.split("/");
+                    if (somenteMenor) {
+                        return new TonicaOpcao(partes[0], partes[0]);
+                    }
                     String rotulo = maiorPrimeiro ? partes[1] + "/" + partes[0] : par;
                     return new TonicaOpcao(par, rotulo);
                 })
                 .toList();
 
         model.addAttribute("tonicas", tonicas);
-        model.addAttribute("rotuloTonica", maiorPrimeiro ? "Tônica (maior/menor)" : "Tônica (menor/maior)");
+        model.addAttribute("rotuloTonica", somenteMenor
+                ? "Tônica (menor)"
+                : (maiorPrimeiro ? "Tônica (maior/menor)" : "Tônica (menor/maior)"));
         model.addAttribute("modoSelecionado", modo);
-        model.addAttribute("tonicaSelecionada", tonica);
+        model.addAttribute("tonicaSelecionada", somenteMenor ? parTonica.split("/")[0] : parTonica);
         model.addAttribute("padraoSelecionado", padrao);
 
         if (gerar) {
             try {
-                ResultadoEstudo resultado = escalatorWebService.gerar(modo, tonica, padrao);
+                ResultadoEstudo resultado = escalatorWebService.gerar(modo, parTonica, padrao);
                 model.addAttribute("resultado", resultado);
             } catch (IllegalArgumentException ex) {
                 model.addAttribute("erro", "Nao foi possivel gerar. Verifique as opcoes selecionadas.");

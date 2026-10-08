@@ -12,6 +12,8 @@ public class GeradorDeTablatura {
     public static final String MODO_PENTATONICA_M7 = "pentatonica m7";
     /** Identificador da pentatônica blues (2-3 notas por corda). */
     public static final String MODO_PENTATONICA_BLUES = "pentatonica blues";
+    /** Identificador do shape 3npc da menor harmonica (7maior na regiao da menor). */
+    public static final String MODO_MENOR_HARMONICA = "Menor Harmônica";
 
     private static final int LIMIAR_OITAVACAO_CORDA_GRAVE = 2;
     private static final int OITAVA = 12;
@@ -49,6 +51,7 @@ public class GeradorDeTablatura {
 
     private static final ShapeMestre SHAPE_3NPC_MAIOR_TRANSPOABLE;
     private static final ShapeMestre SHAPE_3NPC_MENOR_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_HARMONICA_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
     private static final Map<String, Integer> NOTAS_NA_CORDA_E;
@@ -85,6 +88,18 @@ public class GeradorDeTablatura {
         notas3NpcMenor.put("A", Arrays.asList(new NotaTab(5, 11), new NotaTab(7, 14), new NotaTab(8, 17)));
         notas3NpcMenor.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(7, 5), new NotaTab(8, 8)));
         SHAPE_3NPC_MENOR_TRANSPOABLE = new ShapeMestre(notas3NpcMenor, 58);
+
+        // Menor harmonica: mesmo shape de 3 notas por corda da menor (tonica na
+        // corda E grave, casa 5) com a 7maior (G#) no lugar da 7ma natural.
+        // Sao apenas duas trocas de casa: corda D traste 6 (G#) e corda B traste 9 (G#).
+        Map<String, List<NotaTab>> notas3NpcMenorHarmonica = new HashMap<>();
+        notas3NpcMenorHarmonica.put("E_high", Arrays.asList(new NotaTab(7, 50), new NotaTab(8, 53), new NotaTab(10, 56)));
+        notas3NpcMenorHarmonica.put("B", Arrays.asList(new NotaTab(6, 40), new NotaTab(9, 43), new NotaTab(10, 46)));
+        notas3NpcMenorHarmonica.put("G", Arrays.asList(new NotaTab(5, 31), new NotaTab(7, 34), new NotaTab(9, 37)));
+        notas3NpcMenorHarmonica.put("D", Arrays.asList(new NotaTab(6, 20), new NotaTab(7, 23), new NotaTab(9, 26)));
+        notas3NpcMenorHarmonica.put("A", Arrays.asList(new NotaTab(5, 11), new NotaTab(7, 14), new NotaTab(8, 17)));
+        notas3NpcMenorHarmonica.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(7, 5), new NotaTab(8, 8)));
+        SHAPE_3NPC_MENOR_HARMONICA_TRANSPOABLE = new ShapeMestre(notas3NpcMenorHarmonica, 58);
 
         // Pentatonica m7 (menor pentatonica: 1, b3, 4, 5, b7) na caixa clasica do
         // braco com estritamente 2 notas por corda. Tonica na corda E grave (casa 5).
@@ -178,6 +193,9 @@ public class GeradorDeTablatura {
             casaTonicaMestre = 5;
         } else if (MODO_PENTATONICA_BLUES.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_MENOR_HARMONICA.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_HARMONICA_TRANSPOABLE;
             casaTonicaMestre = 5;
         } else if (modoNome.contains("Menor")) {
             shapeBase = SHAPE_3NPC_MENOR_TRANSPOABLE;

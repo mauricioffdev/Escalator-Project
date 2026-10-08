@@ -7,10 +7,10 @@ import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class EscalatorWebService {
@@ -35,7 +35,7 @@ public class EscalatorWebService {
     private final GeradorDePadroes geradorDePadroes = new GeradorDePadroes();
 
     public ResultadoEstudo gerar(String modoOpcao, String tonicaEntrada, String opcaoPadrao) {
-        ParRelativo par = parseParRelativo(tonicaEntrada);
+        ParRelativo par = parseParRelativo(modoOpcao, tonicaEntrada);
 
         String modoNome;
         Nota tonicaFinal;
@@ -61,6 +61,13 @@ public class EscalatorWebService {
             tonicaFinal = par.menor();
             notasDaEscala = Escala.PENTATONICA_BLUES.calcularNotas(tonicaFinal);
             isPentatonica = true;
+        } else if ("5".equals(modoOpcao)) {
+            // Menor harmonica: mesma tonica do par relativo, porem com a 7maior
+            // (T 2 3b 4 5 6b 7+, ex.: A B C D E F G#).
+            modoNome = GeradorDeTablatura.MODO_MENOR_HARMONICA;
+            tonicaFinal = par.menor();
+            notasDaEscala = Escala.MENOR_HARMONICA.calcularNotas(tonicaFinal);
+            isPentatonica = false;
         } else {
             modoNome = "Maior";
             tonicaFinal = par.maior();
@@ -86,11 +93,19 @@ public class EscalatorWebService {
         } else {
             titulo = nomeExibicaoTonicaFinal + " " + modoNome;
         }
-        String notasFormatadas = formatarNotasDaEscala(notasDaEscala, usarNotacaoBemol);
+        // Na menor harmonica os nomes dos graus ja saem com a 7maior escrita
+        // certa (ex.: C# em vez de Db), entao os padroes usam esses nomes.
+        boolean menorHarmonica = GeradorDeTablatura.MODO_MENOR_HARMONICA.equals(modoNome);
+        List<String> nomesDosGraus = menorHarmonica
+                ? nomesDaMenorHarmonica(notasDaEscala, usarNotacaoBemol)
+                : nomesDosGraus(notasDaEscala, usarNotacaoBemol);
+        String notasFormatadas = "[" + String.join(", ", nomesDosGraus) + "]";
 
         return switch (opcaoPadrao) {
             case "2" -> {
-                List<String> triades = geradorDePadroes.gerarTriades(notasDaEscala, modoNome).stream()
+                List<String> triades = menorHarmonica
+                        ? geradorDePadroes.gerarTriadesPorNomes(nomesDosGraus, modoNome)
+                        : geradorDePadroes.gerarTriades(notasDaEscala, modoNome).stream()
                         .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
                         .toList();
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "", "");
@@ -103,7 +118,9 @@ public class EscalatorWebService {
                 yield new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex);
             }
             default -> {
-                List<String> sequencia = geradorDePadroes.gerarSequencia(notasDaEscala, 3).stream()
+                List<String> sequencia = menorHarmonica
+                        ? geradorDePadroes.gerarSequenciaPorNomes(nomesDosGraus, 3)
+                        : geradorDePadroes.gerarSequencia(notasDaEscala, 3).stream()
                         .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
                         .toList();
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "", "");
@@ -111,11 +128,19 @@ public class EscalatorWebService {
         };
     }
 
-    private ParRelativo parseParRelativo(String tonicaEntrada) {
+    /**
+     * Aceita o par relativo (ex.: Am/C) e, apenas na menor harmonica, tambem a
+     * tonica menor sozinha (ex.: Am), ja que essa escala nao tem relativo maior.
+     */
+    private ParRelativo parseParRelativo(String modoOpcao, String tonicaEntrada) {
         if (tonicaEntrada == null || tonicaEntrada.isBlank()) {
             throw new IllegalArgumentException("Tonica invalida");
         }
         String[] partes = tonicaEntrada.trim().split("/");
+        if (partes.length == 1 && "5".equals(modoOpcao)) {
+            Nota menor = parseTonica(partes[0]);
+            return new ParRelativo(menor, Nota.getNotaPorValor(menor.getValor() + 3));
+        }
         if (partes.length != 2) {
             throw new IllegalArgumentException("Tonica deve ser um par relativo (ex.: Am/C)");
         }
@@ -148,11 +173,39 @@ public class EscalatorWebService {
         return nomeNota;
     }
 
-    private String formatarNotasDaEscala(List<Nota> notasDaEscala, boolean usarNotacaoBemol) {
-        List<String> notasFormatadas = notasDaEscala.stream()
+    private List<String> nomesDosGraus(List<Nota> notasDaEscala, boolean usarNotacaoBemol) {
+        return notasDaEscala.stream()
                 .map(nota -> formatarTonicaParaExibicao(nota, usarNotacaoBemol))
-                .collect(Collectors.toList());
-        return "[" + String.join(", ", notasFormatadas) + "]";
+                .toList();
+    }
+
+    /**
+     * Na menor harmonica a ultima nota e a 7maior, escrita a partir da 7ma
+     * menor: bemol vira natural (Bb -> B), natural vira sustenido (G -> G#) e,
+     * quando a 7ma menor ja e sustenida, mantem a forma enarmonica legivel
+     * (Fx -> G). Assim a partitura e os padroes mostram o acidente certo.
+     */
+    private List<String> nomesDaMenorHarmonica(List<Nota> notasDaEscala, boolean usarNotacaoBemol) {
+        List<String> nomes = new ArrayList<>(notasDaEscala.size());
+        for (int i = 0; i < notasDaEscala.size(); i++) {
+            Nota nota = notasDaEscala.get(i);
+            nomes.add(i == notasDaEscala.size() - 1
+                    ? nomeDaSetimaMaior(nota, usarNotacaoBemol)
+                    : formatarTonicaParaExibicao(nota, usarNotacaoBemol));
+        }
+        return nomes;
+    }
+
+    private String nomeDaSetimaMaior(Nota setimaMaior, boolean usarNotacaoBemol) {
+        String setimaMenor = formatarTonicaParaExibicao(
+                Nota.getNotaPorValor(setimaMaior.getValor() - 1), usarNotacaoBemol);
+        if (setimaMenor.endsWith("b")) {
+            return setimaMenor.substring(0, setimaMenor.length() - 1);
+        }
+        if (setimaMenor.endsWith("#")) {
+            return formatarTonicaParaExibicao(setimaMaior, usarNotacaoBemol);
+        }
+        return setimaMenor + "#";
     }
 
     private String formatarTriadeParaExibicao(String triade, boolean usarNotacaoBemol) {
