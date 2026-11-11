@@ -23,13 +23,13 @@ import java.util.List;
  *       (1 por corda, 3 por compasso): compassos 1 e 2 = subida (cordas 6 a 1);
  *       compassos 3 e 4 = retorno (cordas 1 a 6). {@code :8 { tu 3 }} define a
  *       tercina; {@code |} separa os compassos.</li>
- *  <li>Além do shape "3 notas por corda" (padrão), a classe renderiza duas
- *       pentatônicas: <b>"pentatonica m7"</b> com estritamente 2 notas por
- *       corda em <b>semicolcheias</b> ({@code .16}, 12 por compasso 3/4) e
- *       <b>"pentatonica blues"</b> em <b>semicolcheias</b> no compasso 4/4.
- *       Cada volta (ida e retorno) tem 14 notas em 3 grupos completos de 4 e,
- *       no último tempo, 2 semicolcheias seguidas de uma pausa de colcheia
- *       ({@code r.8}), que fecha cada compasso. Nenhuma dinâmica é adicionada.</li>
+ *  <li>Além do shape "3 notas por corda" (padrão), a classe renderiza as
+ *       pentatônicas m7 e blues nos shapes 1 e 2. A m7 usa estritamente 2 notas
+ *       por corda em <b>semicolcheias</b> ({@code .16}, 12 por compasso 3/4) e
+ *       a blues usa <b>semicolcheias</b> no compasso 4/4. No shape 1 blues cada
+ *       volta tem 14 notas e fecha o compasso com uma pausa de colcheia
+ *       ({@code r.8}); no shape 2 blues são 15 notas e o compasso fecha com uma
+ *       pausa de semicolcheia ({@code r.16}). Nenhuma dinâmica é adicionada.</li>
  *  <li>{@code \ts} fixa a fórmula de compasso de cada modo e {@code \ks} a armadura
  *       de clave do tom (acidentes só na armadura, sem sustenidos/bemóis inline
  *       nas notas).</li>
@@ -47,8 +47,10 @@ public class GeradorDeAlphaTex {
     private static final String DURACAO_SEMICOLCHEIA = ".16";
     /** Compasso 3/4 em semicolcheias: 3 grupos de 4 notas (pentatônica m7). */
     private static final int NOTAS_POR_COMPASSO_M7 = 12;
-    /** Compasso 4/4 em semicolcheias: as 14 notas da pentatônica blues em uma barra. */
+    /** Compasso 4/4 em semicolcheias: as 14 notas do shape 1 da pentatônica blues. */
     private static final int NOTAS_POR_COMPASSO_BLUES = 14;
+    /** Shape 2 blues tem 15 notas (blue note nas cordas E grave, G e E aguda). */
+    private static final int NOTAS_POR_COMPASSO_BLUES_SHAPE2 = 15;
     /** Fórmulas de compasso suportadas pelo {@code \ts}. */
     private static final String COMPASSO_3_4 = "3 4";
     private static final String COMPASSO_4_4 = "4 4";
@@ -114,10 +116,13 @@ public class GeradorDeAlphaTex {
      */
     private static ConfiguracaoEstudo configuracao(String modoNome) {
         return switch (modoNome) {
-            case GeradorDeTablatura.MODO_PENTATONICA_M7 ->
+            case GeradorDeTablatura.MODO_PENTATONICA_M7,
+                 GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2 ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_M7, COMPASSO_3_4, "");
             case GeradorDeTablatura.MODO_PENTATONICA_BLUES ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_BLUES, COMPASSO_4_4, " r.8");
+            case GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2 ->
+                    new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_BLUES_SHAPE2, COMPASSO_4_4, " r.16");
             default ->
                     new ConfiguracaoEstudo("Shapes-Tab", DURACAO_TERCINA, "", NOTAS_POR_COMPASSO, COMPASSO_3_4, "");
         };
@@ -144,11 +149,17 @@ public class GeradorDeAlphaTex {
      * a armadura de C). Os demais modos usam {@link #nomeArmadura}.
      */
     private static String nomeArmaduraPara(String tonica, String modoNome) {
-        if (GeradorDeTablatura.MODO_PENTATONICA_M7.equals(modoNome)
-                || GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)) {
+        if (isPentatonica(modoNome)) {
             return relativaMaior(tonica);
         }
         return nomeArmadura(tonica, modoNome.startsWith("Menor"));
+    }
+
+    private static boolean isPentatonica(String modoNome) {
+        return GeradorDeTablatura.MODO_PENTATONICA_M7.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2.equals(modoNome);
     }
 
     private static String relativaMaior(String tonica) {

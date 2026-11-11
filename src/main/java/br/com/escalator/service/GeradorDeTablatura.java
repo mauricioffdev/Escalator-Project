@@ -12,6 +12,10 @@ public class GeradorDeTablatura {
     public static final String MODO_PENTATONICA_M7 = "pentatonica m7";
     /** Identificador da pentatônica blues (2-3 notas por corda). */
     public static final String MODO_PENTATONICA_BLUES = "pentatonica blues";
+    /** Identificador do segundo shape da pentatônica m7 (região das casas 7-10). */
+    public static final String MODO_PENTATONICA_M7_SHAPE2 = "pentatonica m7 shape 2";
+    /** Identificador do segundo shape da pentatônica blues (com a blue note). */
+    public static final String MODO_PENTATONICA_BLUES_SHAPE2 = "pentatonica blues shape 2";
     /** Identificador do shape 3npc da menor harmonica (7maior na regiao da menor). */
     public static final String MODO_MENOR_HARMONICA = "Menor Harmônica";
 
@@ -54,6 +58,8 @@ public class GeradorDeTablatura {
     private static final ShapeMestre SHAPE_3NPC_MENOR_HARMONICA_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE2_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_BLUES_SHAPE2_TRANSPOABLE;
     private static final Map<String, Integer> NOTAS_NA_CORDA_E;
 
     static {
@@ -123,6 +129,34 @@ public class GeradorDeTablatura {
         notasPentatonicaBlues.put("B", Arrays.asList(new NotaTab(5, 32), new NotaTab(8, 35)));
         notasPentatonicaBlues.put("E_high", Arrays.asList(new NotaTab(5, 38), new NotaTab(8, 41)));
         SHAPE_PENTATONICA_BLUES_TRANSPOABLE = new ShapeMestre(notasPentatonicaBlues, 47);
+
+        // Shape 2 da pentatonica m7: segunda posicao da caixa (regiao das casas
+        // 7-10 em A menor). Na referencia de A menor (tons C D E G A) fica nas
+        // cordas 6 a 1 com as casas 8/10, 7/10, 7/10, 7/9, 8/10 e 8/10.
+        // A tonica de referencia continua sendo A (corda E grave, casa 5), o que
+        // permite reaproveitar a mesma transposicao do shape 1.
+        Map<String, List<NotaTab>> notasPentatonicaM7Shape2 = new HashMap<>();
+        notasPentatonicaM7Shape2.put("E_low", Arrays.asList(new NotaTab(8, 2), new NotaTab(10, 5)));
+        notasPentatonicaM7Shape2.put("A", Arrays.asList(new NotaTab(7, 8), new NotaTab(10, 11)));
+        notasPentatonicaM7Shape2.put("D", Arrays.asList(new NotaTab(7, 14), new NotaTab(10, 17)));
+        notasPentatonicaM7Shape2.put("G", Arrays.asList(new NotaTab(7, 20), new NotaTab(9, 23)));
+        notasPentatonicaM7Shape2.put("B", Arrays.asList(new NotaTab(8, 26), new NotaTab(10, 29)));
+        notasPentatonicaM7Shape2.put("E_high", Arrays.asList(new NotaTab(8, 32), new NotaTab(10, 35)));
+        SHAPE_PENTATONICA_M7_SHAPE2_TRANSPOABLE = new ShapeMestre(notasPentatonicaM7Shape2, 38);
+
+        // Shape 2 da pentatonica blues: o mesmo desenho do shape 2 m7 acrescido
+        // da blue note (b5). No shape 2 ela aparece em tres cordas: E grave
+        // (casa 11), G (casa 8) e E aguda (casa 11). A blue note da corda A nao
+        // entra porque a mesma nota ja esta na corda E grave (casa 11). Com isso
+        // cada volta tem 15 notas e fecha o 4/4 com pausa de semicolcheia.
+        Map<String, List<NotaTab>> notasPentatonicaBluesShape2 = new HashMap<>();
+        notasPentatonicaBluesShape2.put("E_low", Arrays.asList(new NotaTab(8, 2), new NotaTab(10, 5), new NotaTab(11, 8)));
+        notasPentatonicaBluesShape2.put("A", Arrays.asList(new NotaTab(7, 11), new NotaTab(10, 14)));
+        notasPentatonicaBluesShape2.put("D", Arrays.asList(new NotaTab(7, 17), new NotaTab(10, 20)));
+        notasPentatonicaBluesShape2.put("G", Arrays.asList(new NotaTab(7, 23), new NotaTab(8, 26), new NotaTab(9, 29)));
+        notasPentatonicaBluesShape2.put("B", Arrays.asList(new NotaTab(8, 32), new NotaTab(10, 35)));
+        notasPentatonicaBluesShape2.put("E_high", Arrays.asList(new NotaTab(8, 38), new NotaTab(10, 41), new NotaTab(11, 44)));
+        SHAPE_PENTATONICA_BLUES_SHAPE2_TRANSPOABLE = new ShapeMestre(notasPentatonicaBluesShape2, 49);
     }
 
     public static String[] gerar(String tonicaAlvo, String modoNome) {
@@ -191,8 +225,14 @@ public class GeradorDeTablatura {
         if (MODO_PENTATONICA_M7.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_M7_TRANSPOABLE;
             casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_SHAPE2.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_SHAPE2_TRANSPOABLE;
+            casaTonicaMestre = 5;
         } else if (MODO_PENTATONICA_BLUES.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_BLUES_SHAPE2.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_BLUES_SHAPE2_TRANSPOABLE;
             casaTonicaMestre = 5;
         } else if (MODO_MENOR_HARMONICA.equals(modoNome)) {
             shapeBase = SHAPE_3NPC_MENOR_HARMONICA_TRANSPOABLE;

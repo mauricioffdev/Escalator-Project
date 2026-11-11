@@ -110,12 +110,18 @@ public class EscalatorWebService {
                         .toList();
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "", "");
             }
-            case "3" -> {
-                String nomePadrao = "Shapes-Tab";
-                String[] tab3Npc = GeradorDeTablatura.gerar(tonicaFinal.toString(), modoNome);
-                String tablatura = String.join(System.lineSeparator(), tab3Npc);
-                String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonicaFinal.toString(), modoNome);
-                yield new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex);
+            case "3" -> gerarResultadoTablatura(
+                    titulo, notasFormatadas, tonicaFinal, "Shapes-Tab", modoNome);
+            case "4" -> {
+                if (!isPentatonica) {
+                    throw new IllegalArgumentException(
+                            "O Shape 2 esta disponivel apenas para as pentatonicas (m7 ou blues).");
+                }
+                String modoShape2 = GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)
+                        ? GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2
+                        : GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2;
+                yield gerarResultadoTablatura(
+                        titulo, notasFormatadas, tonicaFinal, "Shape 2", modoShape2);
             }
             default -> {
                 List<String> sequencia = menorHarmonica
@@ -126,6 +132,16 @@ public class EscalatorWebService {
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "", "");
             }
         };
+    }
+
+    /** Gera a tablatura ASCII e o AlphaTex para o shape/modo informado. */
+    private ResultadoEstudo gerarResultadoTablatura(String titulo, String notasFormatadas,
+                                                    Nota tonica, String nomePadrao,
+                                                    String modoParaTablatura) {
+        String[] linhasTablatura = GeradorDeTablatura.gerar(tonica.toString(), modoParaTablatura);
+        String tablatura = String.join(System.lineSeparator(), linhasTablatura);
+        String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonica.toString(), modoParaTablatura);
+        return new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex);
     }
 
     /**

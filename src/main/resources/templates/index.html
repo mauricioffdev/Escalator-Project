@@ -152,6 +152,7 @@
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
                             <option value="2" th:selected="${padraoSelecionado == '2'}">Sequência de tríades</option>
                             <option value="3" th:selected="${padraoSelecionado == '3'}">Shapes-Tab</option>
+                            <option value="4" th:selected="${padraoSelecionado == '4'}">Shape 2 (Pentatônica)</option>
                         </select>
                     </div>
 
@@ -493,7 +494,36 @@
         });
     }
 
+    // O Shape 2 so existe para as pentatonicas (m7 e blues). Esconde a opcao
+    // nos demais modos e volta para Shapes-Tab se ela estiver selecionada.
+    function configurarOpcaoShape2() {
+        const selectModo = document.getElementById("modo");
+        const selectPadrao = document.getElementById("padrao");
+        if (!selectModo || !selectPadrao) {
+            return;
+        }
+
+        const opcaoShape2 = selectPadrao.querySelector('option[value="4"]');
+        if (!opcaoShape2) {
+            return;
+        }
+
+        const pentatonica = selectModo.value === "3" || selectModo.value === "4";
+        opcaoShape2.hidden = !pentatonica;
+        opcaoShape2.disabled = !pentatonica;
+
+        if (!pentatonica && selectPadrao.value === "4") {
+            selectPadrao.value = "3";
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
+        configurarOpcaoShape2();
+        const selectModo = document.getElementById("modo");
+        if (selectModo) {
+            selectModo.addEventListener("change", configurarOpcaoShape2);
+        }
+
         const selectTonica = document.getElementById("tonica");
         const escalaAtiva = extrairEscalaDaTela();
         const tonicaDaEscalaOriginal = extrairPrimeiraNotaDaTela();
