@@ -112,17 +112,12 @@ public class EscalatorWebService {
             }
             case "3" -> gerarResultadoTablatura(
                     titulo, notasFormatadas, tonicaFinal, "Shapes-Tab", modoNome);
-            case "4" -> {
-                if (!isPentatonica) {
-                    throw new IllegalArgumentException(
-                            "O Shape 2 esta disponivel apenas para as pentatonicas (m7 ou blues).");
-                }
-                String modoShape2 = GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)
-                        ? GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2
-                        : GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2;
-                yield gerarResultadoTablatura(
-                        titulo, notasFormatadas, tonicaFinal, "Shape 2", modoShape2);
-            }
+            case "4" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
+                    isPentatonica, "Shape 2", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2);
+            case "5" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
+                    isPentatonica, "Shape 3", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3);
             default -> {
                 List<String> sequencia = menorHarmonica
                         ? geradorDePadroes.gerarSequenciaPorNomes(nomesDosGraus, 3)
@@ -142,6 +137,18 @@ public class EscalatorWebService {
         String tablatura = String.join(System.lineSeparator(), linhasTablatura);
         String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonica.toString(), modoParaTablatura);
         return new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex);
+    }
+
+    /** Resolve o shape pentatonico escolhido (m7 ou blues) e gera o resultado. */
+    private ResultadoEstudo gerarResultadoShape(String titulo, String notasFormatadas, Nota tonica,
+                                                String modoNome, boolean isPentatonica,
+                                                String nomePadrao, String modoM7, String modoBlues) {
+        if (!isPentatonica) {
+            throw new IllegalArgumentException(
+                    "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues).");
+        }
+        String modoShape = GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome) ? modoBlues : modoM7;
+        return gerarResultadoTablatura(titulo, notasFormatadas, tonica, nomePadrao, modoShape);
     }
 
     /**

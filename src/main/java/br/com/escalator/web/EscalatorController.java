@@ -66,9 +66,10 @@ public class EscalatorController {
                 ResultadoEstudo resultado = escalatorWebService.gerar(modo, parTonica, padrao);
                 model.addAttribute("resultado", resultado);
             } catch (IllegalArgumentException ex) {
-                boolean shape2ForaDePentatonica = "4".equals(padrao) && !("3".equals(modo) || "4".equals(modo));
-                model.addAttribute("erro", shape2ForaDePentatonica
-                        ? "O Shape 2 esta disponivel apenas para as pentatonicas (m7 ou blues)."
+                boolean shapeForaDePentatonica = ("4".equals(padrao) || "5".equals(padrao))
+                        && !("3".equals(modo) || "4".equals(modo));
+                model.addAttribute("erro", shapeForaDePentatonica
+                        ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
                         : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
             }
         }
