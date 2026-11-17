@@ -139,14 +139,14 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-4">
                         <label for="tonica" class="form-label" th:text="${rotuloTonica}">Tônica (menor/maior)</label>
                         <select id="tonica" name="tonica" class="form-select">
                             <option th:each="opt : ${tonicas}" th:value="${opt.valor}" th:text="${opt.rotulo}" th:selected="${opt.valor == tonicaSelecionada}"></option>
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-4">
                         <label for="padrao" class="form-label">Padrão</label>
                         <select id="padrao" name="padrao" class="form-select">
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
@@ -157,7 +157,18 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-2 d-grid">
+                    <div class="col-12 col-md-9">
+                        <label for="lick" class="form-label">Licks</label>
+                        <select id="lick" name="lick" class="form-select">
+                            <option value="" th:selected="${lickSelecionado == null or lickSelecionado.isEmpty()}">Nenhum</option>
+                            <option th:each="lick : ${licksDisponiveis}"
+                                    th:value="${lick.id}"
+                                    th:text="${lick.titulo}"
+                                    th:selected="${lick.id == lickSelecionado}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3 d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">Gerar</button>
                     </div>
                 </form>
@@ -170,6 +181,10 @@
                     <p class="mb-2"><strong>Notas:</strong> <span id="notas-resultado" th:text="${resultado.notasFormatadas}"></span></p>
                     <p class="mb-2"><strong>Tonica atual:</strong> <span id="tonica-atual">-</span></p>
                     <p class="mb-3"><strong>Padrão escolhido:</strong> <span th:text="${resultado.nomePadrao}"></span></p>
+
+                    <pre th:if="${resultado != null and lickSelecionado != null and !lickSelecionado.isEmpty() and !resultado.tablaturaFormatada.isEmpty()}"
+                         class="tablatura visually-hidden"
+                         th:text="${resultado.tablaturaFormatada}"></pre>
 
                     <div th:if="${resultado.tablaturaAlphaTex != null and !resultado.tablaturaAlphaTex.isEmpty()}">
                         <div class="at-player d-flex align-items-center gap-2 px-2 py-2 flex-wrap mb-2" id="alphaTabControls" style="display: none;">
@@ -425,12 +440,15 @@
     function extrairCoordenadasDaTablatura() {
         const coordenadas = [];
         const preTablatura = document.querySelector(".tablatura");
+        const textoTablatura = preTablatura
+            ? (preTablatura.textContent || preTablatura.innerText || "")
+            : "";
 
-        if (!preTablatura || !preTablatura.innerText) {
+        if (!textoTablatura.trim()) {
             return coordenadas;
         }
 
-        const linhasText = preTablatura.innerText.trim().split('\n');
+        const linhasText = textoTablatura.trim().split('\n');
         const linhasDeCorda = linhasText.filter(linha => linha.includes('|'));
 
         if (linhasDeCorda.length < 6) {
@@ -520,11 +538,37 @@
         }
     }
 
+    // Quando um lick esta selecionado, os controles de escala nao sao usados.
+    // Desabilita-os para deixar claro que o lick tem prioridade no formulario.
+    function configurarSelecaoLick() {
+        const selectLick = document.getElementById("lick");
+        if (!selectLick) {
+            return;
+        }
+
+        const lickAtivo = selectLick.value !== "";
+        ["modo", "tonica", "padrao"].forEach(id => {
+            const select = document.getElementById(id);
+            if (select) {
+                select.disabled = lickAtivo;
+            }
+        });
+
+        if (!lickAtivo) {
+            configurarOpcoesShape();
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-        configurarOpcoesShape();
+        configurarSelecaoLick();
         const selectModo = document.getElementById("modo");
         if (selectModo) {
             selectModo.addEventListener("change", configurarOpcoesShape);
+        }
+
+        const selectLick = document.getElementById("lick");
+        if (selectLick) {
+            selectLick.addEventListener("change", configurarSelecaoLick);
         }
 
         const selectTonica = document.getElementById("tonica");

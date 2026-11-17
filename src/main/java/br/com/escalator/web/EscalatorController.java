@@ -1,5 +1,6 @@
 package br.com.escalator.web;
 
+import br.com.escalator.service.GeradorDeLicks;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class EscalatorController {
             @RequestParam(defaultValue = "1") String modo,
             @RequestParam(defaultValue = "Am/C") String tonica,
             @RequestParam(defaultValue = "1") String padrao,
+            @RequestParam(defaultValue = "") String lick,
             @RequestParam(defaultValue = "false") boolean gerar,
             Model model
     ) {
@@ -60,17 +62,25 @@ public class EscalatorController {
         model.addAttribute("modoSelecionado", modo);
         model.addAttribute("tonicaSelecionada", somenteMenor ? parTonica.split("/")[0] : parTonica);
         model.addAttribute("padraoSelecionado", padrao);
+        model.addAttribute("licksDisponiveis", GeradorDeLicks.listar());
+        model.addAttribute("lickSelecionado", lick);
 
         if (gerar) {
             try {
-                ResultadoEstudo resultado = escalatorWebService.gerar(modo, parTonica, padrao);
+                ResultadoEstudo resultado = lick != null && !lick.isBlank()
+                        ? escalatorWebService.gerarLick(lick)
+                        : escalatorWebService.gerar(modo, parTonica, padrao);
                 model.addAttribute("resultado", resultado);
             } catch (IllegalArgumentException ex) {
-                boolean shapeForaDePentatonica = ("4".equals(padrao) || "5".equals(padrao))
-                        && !("3".equals(modo) || "4".equals(modo));
-                model.addAttribute("erro", shapeForaDePentatonica
-                        ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
-                        : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
+                if (lick != null && !lick.isBlank()) {
+                    model.addAttribute("erro", "Lick invalido. Selecione uma opcao disponivel.");
+                } else {
+                    boolean shapeForaDePentatonica = ("4".equals(padrao) || "5".equals(padrao))
+                            && !("3".equals(modo) || "4".equals(modo));
+                    model.addAttribute("erro", shapeForaDePentatonica
+                            ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
+                            : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
+                }
             }
         }
 

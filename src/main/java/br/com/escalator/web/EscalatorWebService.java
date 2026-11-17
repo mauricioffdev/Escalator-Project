@@ -3,6 +3,7 @@ package br.com.escalator.web;
 import br.com.escalator.model.Escala;
 import br.com.escalator.model.Nota;
 import br.com.escalator.service.GeradorDeAlphaTex;
+import br.com.escalator.service.GeradorDeLicks;
 import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
 import org.springframework.stereotype.Service;
@@ -127,6 +128,21 @@ public class EscalatorWebService {
                 yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "", "");
             }
         };
+    }
+
+    /** Gera o lick fixo escolhido no dropdown de Licks. */
+    public ResultadoEstudo gerarLick(String lickOpcao) {
+        GeradorDeLicks.Lick lick = GeradorDeLicks.buscar(lickOpcao);
+        if (lick == null) {
+            throw new IllegalArgumentException("Lick invalido");
+        }
+        return new ResultadoEstudo(
+                lick.titulo(),
+                lick.notasFormatadas(),
+                lick.nomePadrao(),
+                List.of(),
+                lick.tablatura(),
+                lick.alphaTex());
     }
 
     /** Gera a tablatura ASCII e o AlphaTex para o shape/modo informado. */
