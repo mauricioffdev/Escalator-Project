@@ -24,13 +24,15 @@ import java.util.List;
  *       compassos 3 e 4 = retorno (cordas 1 a 6). {@code :8 { tu 3 }} define a
  *       tercina; {@code |} separa os compassos.</li>
  *  <li>Além do shape "3 notas por corda" (padrão), a classe renderiza as
- *       pentatônicas m7 e blues nos shapes 1, 2 e 3. A m7 usa estritamente 2
- *       notas por corda em <b>semicolcheias</b> ({@code .16}, 12 por compasso
- *       3/4) e a blues usa <b>semicolcheias</b> no compasso 4/4. No shape 1
- *       blues cada volta tem 14 notas e fecha o compasso com uma pausa de
- *       colcheia ({@code r.8}); nos shapes 2 e 3 blues são 15 notas e o
- *       compasso fecha com uma pausa de semicolcheia ({@code r.16}). Nenhuma
- *       dinâmica é adicionada.</li>
+ *       pentatônicas m7 (shapes 1 a 5 e extra) e blues (shapes 1 a 3). Os
+ *       shapes m7 1 a 5 usam 2 notas por corda em <b>semicolcheias</b>
+ *       ({@code .16}, 12 por compasso 3/4); o extra usa 3 notas por corda,
+ *       duas tercinas de colcheia por compasso 2/4 ({@code :8 { tu 3 }}).
+ *       A blues usa semicolcheias no compasso 4/4: 14 notas + {@code r.8} no
+ *       shape 1 e 15 notas + {@code r.16} nos shapes 2 e 3. Nenhuma dinâmica
+ *       é adicionada.</li>
+ *  <li>{@code \instrument 29} seleciona o preset GM de guitarra com overdrive
+ *       leve para a reprodução (o padrão do AlphaTex é guitarra acústica).</li>
  *  <li>{@code \ts} fixa a fórmula de compasso de cada modo e {@code \ks} a armadura
  *       de clave do tom (acidentes só na armadura, sem sustenidos/bemóis inline
  *       nas notas).</li>
@@ -52,7 +54,12 @@ public class GeradorDeAlphaTex {
     private static final int NOTAS_POR_COMPASSO_BLUES = 14;
     /** Shapes 2 e 3 blues tem 15 notas (blue note nas cordas E grave, G e E aguda). */
     private static final int NOTAS_POR_COMPASSO_BLUES_15 = 15;
+    /** GM 29 (0-based): guitarra com overdrive leve no lugar da acústica padrão. */
+    private static final String INSTRUMENTO = "\\instrument 29\n";
+    /** Duas tercinas de colcheia (6 notas) completam o compasso 2/4 do shape extra. */
+    private static final int NOTAS_POR_COMPASSO_2_TERCINAS = 6;
     /** Fórmulas de compasso suportadas pelo {@code \ts}. */
+    private static final String COMPASSO_2_4 = "2 4";
     private static final String COMPASSO_3_4 = "3 4";
     private static final String COMPASSO_4_4 = "4 4";
     /** Tuning padrão da guitarra: lista da corda 1 (E4 aguda) à corda 6 (E2 grave). */
@@ -82,6 +89,7 @@ public class GeradorDeAlphaTex {
         StringBuilder tex = new StringBuilder();
         tex.append("\\title \"").append(escapar(titulo)).append("\"\n");
         tex.append(TUNING);
+        tex.append(INSTRUMENTO);
         tex.append("\\ts ").append(config.compasso()).append('\n');
         tex.append("\\ks ").append(nomeArmaduraPara(tonicaAlvo, modoNome)).append('\n');
 
@@ -109,18 +117,23 @@ public class GeradorDeAlphaTex {
     }
 
     /**
-     * Define as regras de renderização de acordo com o modo solicitado. A
-     * pentatônica m7 usa estritamente 2 notas por corda (semicolcheias, 12 por
-     * compasso 3/4). A blues usa semicolcheias em 4/4: o shape 1 tem 14 notas e
-     * uma pausa de colcheia no último tempo; os shapes 2 e 3 têm 15 notas e uma
-     * pausa de semicolcheia. Nenhuma dinâmica é adicionada em qualquer caso.
+     * Define as regras de renderização de acordo com o modo solicitado. Na m7,
+     * os shapes 1 a 5 usam semicolcheias (12 por compasso 3/4) e o extra usa
+     * duas tercinas de colcheia por compasso 2/4. A blues usa semicolcheias em
+     * 4/4: o shape 1 tem 14 notas e pausa de colcheia; os shapes 2 e 3 têm 15
+     * notas e pausa de semicolcheia. Nenhuma dinâmica é adicionada em qualquer
+     * caso.
      */
     private static ConfiguracaoEstudo configuracao(String modoNome) {
         return switch (modoNome) {
             case GeradorDeTablatura.MODO_PENTATONICA_M7,
                  GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2,
-                 GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3 ->
+                 GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3,
+                 GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE4,
+                 GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE5 ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_M7, COMPASSO_3_4, "");
+            case GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA ->
+                    new ConfiguracaoEstudo(null, DURACAO_TERCINA, "", NOTAS_POR_COMPASSO_2_TERCINAS, COMPASSO_2_4, "");
             case GeradorDeTablatura.MODO_PENTATONICA_BLUES ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_BLUES, COMPASSO_4_4, " r.8");
             case GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2,
@@ -162,6 +175,9 @@ public class GeradorDeAlphaTex {
         return GeradorDeTablatura.MODO_PENTATONICA_M7.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE4.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE5.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3.equals(modoNome);

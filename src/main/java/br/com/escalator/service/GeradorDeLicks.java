@@ -24,6 +24,8 @@ public final class GeradorDeLicks {
     private static final String NOTAS_FRIGIO_DOMINANTE = "[E, F, G#, A, B, C, D]";
     private static final String NOME_PADRAO_FRIGIO_DOMINANTE = "Lick - Frígio Dominante";
     private static final String TUNING = "\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n";
+    /** GM 29 (0-based): guitarra com overdrive leve, padrão de todas as escalas e licks. */
+    private static final String INSTRUMENTO = "\\instrument 29\n";
     private static final String COMPASSO_4_4 = "4 4";
 
     /** Primeiro compasso: 16 semicolcheias, sem pausa. */
@@ -98,6 +100,7 @@ public final class GeradorDeLicks {
         StringBuilder tex = new StringBuilder();
         tex.append("\\title \"").append(TITULO_FRIGIO_DOMINANTE).append("\"\n");
         tex.append(TUNING);
+        tex.append(INSTRUMENTO);
         tex.append("\\ts ").append(COMPASSO_4_4).append('\n');
         tex.append("\\ks C\n");
 

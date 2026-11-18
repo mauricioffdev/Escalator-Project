@@ -151,9 +151,12 @@
                         <select id="padrao" name="padrao" class="form-select">
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
                             <option value="2" th:selected="${padraoSelecionado == '2'}">Sequência de tríades</option>
-                            <option value="3" th:selected="${padraoSelecionado == '3'}">Shapes-Tab</option>
-                            <option value="4" th:selected="${padraoSelecionado == '4'}">Shape 2 (Pentatônica)</option>
-                            <option value="5" th:selected="${padraoSelecionado == '5'}">Shape 3 (Pentatônica)</option>
+                            <option value="3" th:selected="${padraoSelecionado == '3'}">Shape 1</option>
+                            <option value="4" th:selected="${padraoSelecionado == '4'}">Shape 2</option>
+                            <option value="5" th:selected="${padraoSelecionado == '5'}">Shape 3</option>
+                            <option value="6" th:selected="${padraoSelecionado == '6'}">Shape 4</option>
+                            <option value="7" th:selected="${padraoSelecionado == '7'}">Shape 5</option>
+                            <option value="8" th:selected="${padraoSelecionado == '8'}">Shape Extra (3 oitavas)</option>
                         </select>
                     </div>
 
@@ -199,6 +202,11 @@
                                 <option value="1">100%</option>
                                 <option value="1.25">125%</option>
                                 <option value="1.5">150%</option>
+                            </select>
+                            <label class="small mb-0 ms-2" for="playerTimbre">Timbre:</label>
+                            <select id="playerTimbre" class="form-select form-select-sm w-auto" aria-label="Timbre da guitarra" disabled>
+                                <option value="27">Clean</option>
+                                <option value="29" selected>Overdrive</option>
                             </select>
                             <span id="playerProgress" class="at-player-progress ms-auto small font-monospace">00:00 / 00:00</span>
                         </div>
@@ -259,6 +267,7 @@
         metronome: document.getElementById("btnMetronome"),
         loop: document.getElementById("btnLoop"),
         tempo: document.getElementById("playerTempo"),
+        timbre: document.getElementById("playerTimbre"),
         progresso: document.getElementById("playerProgress")
     };
 
@@ -298,7 +307,7 @@
                     enableCursor: true,
                     enableAnimatedBeatCursor: true,
                     enableElementHighlighting: true,
-                    soundFont: "https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.8.4/dist/soundfont/sonivox.sf2"
+                    soundFont: "/soundfonts/GeneralUser-GS.v2.0.3.sf3"
                 }
             });
 
@@ -329,6 +338,7 @@
                 playerBotoes.metronome.disabled = false;
                 playerBotoes.loop.disabled = false;
                 playerBotoes.tempo.disabled = false;
+                playerBotoes.timbre.disabled = false;
                 api.playbackSpeed = parseFloat(playerBotoes.tempo.value);
                 playerBotoes.loop.classList.toggle("active", api.isLooping);
                 atualizarBotoes(api.playerState);
@@ -374,6 +384,40 @@
 
             playerBotoes.tempo.addEventListener("change", () => {
                 api.playbackSpeed = parseFloat(playerBotoes.tempo.value);
+            });
+
+            playerBotoes.timbre.addEventListener("change", () => {
+                // Troca apenas o timbre (GM 27 = clean, GM 29 = overdrive). Notas, ritmos
+                // e shapes permanecem intactos: apenas o MIDI e regerado.
+                //
+                // O alphaTab cria, no parse do AlphaTex, uma "automation" de instrumento
+                // no primeiro beat com o valor de \instrument (29) congelado. Se so
+                // playbackInfo.program for alterado, o gerador emite PC 27 (novo) e logo
+                // depois PC 29 (automation antiga) no tick 0 - o 29 vence e o clean nunca
+                // toca. Por isso atualizamos também todas as automations de instrumento.
+                const program = parseInt(playerBotoes.timbre.value, 10);
+                if (!api.score) {
+                    return;
+                }
+                for (const track of api.score.tracks) {
+                    track.playbackInfo.program = program;
+                    for (const staff of track.staves) {
+                        for (const bar of staff.bars) {
+                            for (const voice of bar.voices) {
+                                for (const beat of voice.beats) {
+                                    for (const automation of beat.automations || []) {
+                                        // 2 = AutomationType.Instrument
+                                        if (automation.type === 2) {
+                                            automation.value = program;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                api.loadMidiForScore();
+                atualizarBotoes(alphaTab.synth.PlayerState.Paused);
             });
 
             api.error.on(err => {
@@ -513,8 +557,8 @@
         });
     }
 
-    // Os Shapes 2 e 3 so existem para as pentatonicas (m7 e blues). Esconde as
-    // opcoes nos demais modos e volta para Shapes-Tab se uma delas estiver ativa.
+    // Shapes 2 e 3 existem para m7 e blues; Shapes 4, 5 e Extra apenas para m7.
+    // Esconde as opcoes incompativeis e volta para Shape 1 se uma estiver ativa.
     function configurarOpcoesShape() {
         const selectModo = document.getElementById("modo");
         const selectPadrao = document.getElementById("padrao");
@@ -523,17 +567,26 @@
         }
 
         const opcoesShape = selectPadrao.querySelectorAll('option[value="4"], option[value="5"]');
-        if (opcoesShape.length === 0) {
+        const opcoesShapeM7 = selectPadrao.querySelectorAll('option[value="6"], option[value="7"], option[value="8"]');
+        if (opcoesShape.length === 0 && opcoesShapeM7.length === 0) {
             return;
         }
 
         const pentatonica = selectModo.value === "3" || selectModo.value === "4";
+        const pentatonicaM7 = selectModo.value === "3";
         opcoesShape.forEach(opcao => {
             opcao.hidden = !pentatonica;
             opcao.disabled = !pentatonica;
         });
+        opcoesShapeM7.forEach(opcao => {
+            opcao.hidden = !pentatonicaM7;
+            opcao.disabled = !pentatonicaM7;
+        });
 
         if (!pentatonica && (selectPadrao.value === "4" || selectPadrao.value === "5")) {
+            selectPadrao.value = "3";
+        }
+        if (!pentatonicaM7 && ["6", "7", "8"].includes(selectPadrao.value)) {
             selectPadrao.value = "3";
         }
     }

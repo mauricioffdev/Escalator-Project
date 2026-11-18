@@ -77,9 +77,13 @@ public class EscalatorController {
                 } else {
                     boolean shapeForaDePentatonica = ("4".equals(padrao) || "5".equals(padrao))
                             && !("3".equals(modo) || "4".equals(modo));
-                    model.addAttribute("erro", shapeForaDePentatonica
-                            ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
-                            : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
+                    boolean shapeM7ForaDePentatonica = ("6".equals(padrao) || "7".equals(padrao)
+                            || "8".equals(padrao)) && !"3".equals(modo);
+                    model.addAttribute("erro", shapeM7ForaDePentatonica
+                            ? "Os Shapes 4, 5 e Extra estao disponiveis apenas para a pentatonica m7."
+                            : shapeForaDePentatonica
+                                    ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
+                                    : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
                 }
             }
         }

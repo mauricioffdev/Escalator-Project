@@ -20,6 +20,12 @@ public class GeradorDeTablatura {
     public static final String MODO_PENTATONICA_M7_SHAPE3 = "pentatonica m7 shape 3";
     /** Identificador do terceiro shape da pentatônica blues (com a blue note). */
     public static final String MODO_PENTATONICA_BLUES_SHAPE3 = "pentatonica blues shape 3";
+    /** Identificador do quarto shape da pentatônica m7 (região das casas 12-15). */
+    public static final String MODO_PENTATONICA_M7_SHAPE4 = "pentatonica m7 shape 4";
+    /** Identificador do quinto shape da pentatônica m7 (região das casas 14-17). */
+    public static final String MODO_PENTATONICA_M7_SHAPE5 = "pentatonica m7 shape 5";
+    /** Shape extra da folha: posição aberta de 3 oitavas. */
+    public static final String MODO_PENTATONICA_M7_EXTRA = "pentatonica m7 extra";
     /** Identificador do shape 3npc da menor harmonica (7maior na regiao da menor). */
     public static final String MODO_MENOR_HARMONICA = "Menor Harmônica";
 
@@ -66,6 +72,9 @@ public class GeradorDeTablatura {
     private static final ShapeMestre SHAPE_PENTATONICA_BLUES_SHAPE2_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE3_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_BLUES_SHAPE3_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE4_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE5_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_EXTRA_TRANSPOABLE;
     private static final Map<String, Integer> NOTAS_NA_CORDA_E;
 
     static {
@@ -188,6 +197,43 @@ public class GeradorDeTablatura {
         notasPentatonicaBluesShape3.put("B", Arrays.asList(new NotaTab(10, 32), new NotaTab(13, 35)));
         notasPentatonicaBluesShape3.put("E_high", Arrays.asList(new NotaTab(10, 38), new NotaTab(11, 41), new NotaTab(12, 44)));
         SHAPE_PENTATONICA_BLUES_SHAPE3_TRANSPOABLE = new ShapeMestre(notasPentatonicaBluesShape3, 49);
+
+        // Os shapes 4, 5 e extra vem da folha de pentatonica m7. Os numeros
+        // impressos no PDF sao dedos; as casas abaixo foram lidas pela posicao
+        // horizontal de cada numero, mantendo a mesma referencia de A menor
+        // (tonica na casa 5 da corda E grave) dos shapes 1, 2 e 3.
+        Map<String, List<NotaTab>> notasPentatonicaM7Shape4 = new HashMap<>();
+        notasPentatonicaM7Shape4.put("E_low", Arrays.asList(new NotaTab(12, 2), new NotaTab(15, 5)));
+        notasPentatonicaM7Shape4.put("A", Arrays.asList(new NotaTab(12, 8), new NotaTab(15, 11)));
+        notasPentatonicaM7Shape4.put("D", Arrays.asList(new NotaTab(12, 14), new NotaTab(14, 17)));
+        notasPentatonicaM7Shape4.put("G", Arrays.asList(new NotaTab(12, 20), new NotaTab(14, 23)));
+        notasPentatonicaM7Shape4.put("B", Arrays.asList(new NotaTab(13, 26), new NotaTab(15, 29)));
+        notasPentatonicaM7Shape4.put("E_high", Arrays.asList(new NotaTab(12, 32), new NotaTab(15, 35)));
+        SHAPE_PENTATONICA_M7_SHAPE4_TRANSPOABLE = new ShapeMestre(notasPentatonicaM7Shape4, 38);
+
+        // Shape 5: mantem a ultima nota A da casa 17 na corda 1, conforme a
+        // folha. A subida termina nela, como nos demais shapes, e o retorno
+        // completo fecha o loop.
+        Map<String, List<NotaTab>> notasPentatonicaM7Shape5 = new HashMap<>();
+        notasPentatonicaM7Shape5.put("E_low", Arrays.asList(new NotaTab(15, 2), new NotaTab(17, 5)));
+        notasPentatonicaM7Shape5.put("A", Arrays.asList(new NotaTab(15, 8), new NotaTab(17, 11)));
+        notasPentatonicaM7Shape5.put("D", Arrays.asList(new NotaTab(14, 14), new NotaTab(17, 17)));
+        notasPentatonicaM7Shape5.put("G", Arrays.asList(new NotaTab(14, 20), new NotaTab(17, 23)));
+        notasPentatonicaM7Shape5.put("B", Arrays.asList(new NotaTab(15, 26), new NotaTab(17, 29)));
+        notasPentatonicaM7Shape5.put("E_high", Arrays.asList(new NotaTab(15, 32), new NotaTab(17, 35)));
+        SHAPE_PENTATONICA_M7_SHAPE5_TRANSPOABLE = new ShapeMestre(notasPentatonicaM7Shape5, 38);
+
+        // Shape extra (penta menor aberta): 3 notas por corda, da casa 5 da E
+        // grave a casa 15 da E aguda. Sao 18 notas na subida, exatamente 3
+        // compassos de 2 tercinas, e o retorno repete o topo para fechar o loop.
+        Map<String, List<NotaTab>> notasPentatonicaM7Extra = new HashMap<>();
+        notasPentatonicaM7Extra.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(8, 5), new NotaTab(10, 8)));
+        notasPentatonicaM7Extra.put("A", Arrays.asList(new NotaTab(5, 11), new NotaTab(7, 14), new NotaTab(10, 17)));
+        notasPentatonicaM7Extra.put("D", Arrays.asList(new NotaTab(7, 20), new NotaTab(10, 23), new NotaTab(12, 26)));
+        notasPentatonicaM7Extra.put("G", Arrays.asList(new NotaTab(7, 31), new NotaTab(9, 34), new NotaTab(12, 37)));
+        notasPentatonicaM7Extra.put("B", Arrays.asList(new NotaTab(10, 40), new NotaTab(13, 43), new NotaTab(15, 46)));
+        notasPentatonicaM7Extra.put("E_high", Arrays.asList(new NotaTab(10, 50), new NotaTab(12, 53), new NotaTab(15, 56)));
+        SHAPE_PENTATONICA_M7_EXTRA_TRANSPOABLE = new ShapeMestre(notasPentatonicaM7Extra, 58);
     }
 
     public static String[] gerar(String tonicaAlvo, String modoNome) {
@@ -261,6 +307,15 @@ public class GeradorDeTablatura {
             casaTonicaMestre = 5;
         } else if (MODO_PENTATONICA_M7_SHAPE3.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_M7_SHAPE3_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_SHAPE4.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_SHAPE4_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_SHAPE5.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_SHAPE5_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_EXTRA.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_EXTRA_TRANSPOABLE;
             casaTonicaMestre = 5;
         } else if (MODO_PENTATONICA_BLUES.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
