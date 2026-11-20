@@ -1,6 +1,8 @@
 package br.com.escalator.web;
 
 import br.com.escalator.service.GeradorDeLicks;
+import br.com.escalator.service.ModoMaior;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,10 @@ public class EscalatorController {
             "Am/C", "Em/G", "Bm/D", "F#m/A", "C#m/E", "G#m/B", "D#m/F#", "A#m/C#",
             "Dm/F", "Gm/Bb", "Cm/Eb", "Fm/Ab", "Bbm/Db", "Ebm/Gb", "Abm/Cb"
     );
+
+    /** Modos em que a tonica maior aparece primeiro no rotulo (C/Am). */
+    private static final List<String> MODOS_MAIOR_PRIMEIRO =
+            List.of("1", "6", "7", "8", "9", "2", "10");
 
     private final EscalatorWebService escalatorWebService;
 
@@ -35,7 +41,9 @@ public class EscalatorController {
             @RequestParam(defaultValue = "false") boolean gerar,
             Model model
     ) {
-        boolean maiorPrimeiro = "1".equals(modo);
+        // Nos 7 modos da escala maior a tonica maior vem primeiro (C/Am);
+        // nas pentatonicas permanece a menor primeiro (Am/C).
+        boolean maiorPrimeiro = MODOS_MAIOR_PRIMEIRO.contains(modo);
         // Menor harmonica nao tem relativo maior: o dropdown mostra so a tonica menor.
         boolean somenteMenor = "5".equals(modo);
         // Tonica enviada sem o relativo (dropdown da menor harmonica ou troca de
@@ -62,6 +70,7 @@ public class EscalatorController {
         model.addAttribute("modoSelecionado", modo);
         model.addAttribute("tonicaSelecionada", somenteMenor ? parTonica.split("/")[0] : parTonica);
         model.addAttribute("padraoSelecionado", padrao);
+        model.addAttribute("modosGregos", ModoMaior.values());
         model.addAttribute("licksDisponiveis", GeradorDeLicks.listar());
         model.addAttribute("lickSelecionado", lick);
 
@@ -75,15 +84,11 @@ public class EscalatorController {
                 if (lick != null && !lick.isBlank()) {
                     model.addAttribute("erro", "Lick invalido. Selecione uma opcao disponivel.");
                 } else {
-                    boolean shapeForaDePentatonica = ("4".equals(padrao) || "5".equals(padrao))
+                    boolean shapeForaDePentatonica = List.of("4", "5", "6", "7", "8").contains(padrao)
                             && !("3".equals(modo) || "4".equals(modo));
-                    boolean shapeM7ForaDePentatonica = ("6".equals(padrao) || "7".equals(padrao)
-                            || "8".equals(padrao)) && !"3".equals(modo);
-                    model.addAttribute("erro", shapeM7ForaDePentatonica
-                            ? "Os Shapes 4, 5 e Extra estao disponiveis apenas para a pentatonica m7."
-                            : shapeForaDePentatonica
-                                    ? "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues)."
-                                    : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
+                    model.addAttribute("erro", shapeForaDePentatonica
+                            ? "Os Shapes 2 a 5 e Extra estao disponiveis apenas para as pentatonicas (m7 ou blues)."
+                            : "Nao foi possivel gerar. Verifique as opcoes selecionadas.");
                 }
             }
         }

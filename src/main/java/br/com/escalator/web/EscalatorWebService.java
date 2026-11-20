@@ -1,36 +1,37 @@
 package br.com.escalator.web;
 
+import br.com.escalator.model.Armadura;
 import br.com.escalator.model.Escala;
 import br.com.escalator.model.Nota;
 import br.com.escalator.service.GeradorDeAlphaTex;
 import br.com.escalator.service.GeradorDeLicks;
 import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
+import br.com.escalator.service.ModoMaior;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class EscalatorWebService {
 
+    /** Entrada do usuario em bemol (minusculas) para o nome do enum. */
     private static final Map<String, String> BEMOL_TO_SHARP = Map.of(
-            "BB", "A_SHARP", "EB", "D_SHARP", "AB", "G_SHARP", "DB", "C_SHARP", "GB", "F_SHARP", "CB", "B"
+            "BB", "A_SHARP", "EB", "D_SHARP", "AB", "G_SHARP",
+            "DB", "C_SHARP", "GB", "F_SHARP", "CB", "B"
     );
 
-    private static final Map<String, String> SHARP_TO_BEMOL = Map.of(
-            "A#", "Bb", "D#", "Eb", "G#", "Ab", "C#", "Db", "F#", "Gb"
-    );
-
-    /** Tonicas maiores cuja armadura e escrita com benois: F, Bb, Eb, Ab, Db, Gb. */
-    private static final List<Nota> TONICAS_MAIORES_DE_BEMOL = List.of(
-            Nota.F, Nota.A_SHARP, Nota.D_SHARP, Nota.G_SHARP, Nota.C_SHARP, Nota.F_SHARP
-    );
-
-    /** Par relativo escolhido no dropdown: sempre comeca pela menor. */
-    private record ParRelativo(Nota menor, Nota maior) {
+    /**
+     * Par relativo escolhido no dropdown. {@code usarBemol} vem do nome digitado
+     * (ciclo das quartas) e nao da altitude: F# e C# sao sustenidos, Gb e Cb
+     * sao bemois, mesmo quando soam igual.
+     */
+    private record ParRelativo(Nota menor, Nota maior, boolean usarBemol) {
     }
 
     private final GeradorDePadroes geradorDePadroes = new GeradorDePadroes();
@@ -42,6 +43,12 @@ public class EscalatorWebService {
         Nota tonicaFinal;
         List<Nota> notasDaEscala;
         boolean isPentatonica;
+        // A escala maior agora e um unico modo de estudo: o grego e escolhido
+        // no seletor de padrao. As opcoes legadas seguem funcionando por URL.
+        Optional<ModoMaior> modoGrego = "1".equals(modoOpcao)
+                ? ModoMaior.porPadrao(opcaoPadrao)
+                : Optional.empty();
+        var modoMaior = modoGrego.isPresent() ? modoGrego : ModoMaior.porOpcao(modoOpcao);
 
         if ("2".equals(modoOpcao)) {
             modoNome = "Menor Natural (Relativa)";
@@ -69,6 +76,12 @@ public class EscalatorWebService {
             tonicaFinal = par.menor();
             notasDaEscala = Escala.MENOR_HARMONICA.calcularNotas(tonicaFinal);
             isPentatonica = false;
+        } else if (modoMaior.isPresent()) {
+            ModoMaior modo = modoMaior.get();
+            modoNome = modo.modoTablatura();
+            tonicaFinal = Nota.getNotaPorValor(par.maior().getValor() + modo.grau());
+            notasDaEscala = escalaMaiorRotacionada(par.maior(), tonicaFinal);
+            isPentatonica = false;
         } else {
             modoNome = "Maior";
             tonicaFinal = par.maior();
@@ -76,13 +89,12 @@ public class EscalatorWebService {
             isPentatonica = false;
         }
 
-        // A convencao de escrita (com benois) acompanha a armadura: para modos
-        // menor/pentatonica a armadura e a da relativa maior do tom escolhido.
-        Nota tonicaMaiorParaConvencao = "1".equals(modoOpcao)
-                ? tonicaFinal
-                : Nota.getNotaPorValor(par.menor().getValor() + 3);
-        boolean usarNotacaoBemol = isTonicaDeBemol(tonicaMaiorParaConvencao);
-        String nomeExibicaoTonicaFinal = formatarTonicaParaExibicao(tonicaFinal, usarNotacaoBemol);
+        // Toda a escrita (titulo, graus, triades, sequencias e armadura) vem da
+        // MESMA soletracao diatonica do campo harmonico em Armadura. O ciclo e o
+        // do nome digitado: quintas -> sustenidos, quartas -> bemois.
+        boolean usarBemol = par.usarBemol();
+        Nota parente = par.maior();
+        String nomeExibicaoTonicaFinal = Armadura.nomeDaNota(tonicaFinal, parente, usarBemol);
 
         String titulo;
         if (isPentatonica) {
@@ -94,44 +106,63 @@ public class EscalatorWebService {
         } else {
             titulo = nomeExibicaoTonicaFinal + " " + modoNome;
         }
-        // Na menor harmonica os nomes dos graus ja saem com a 7maior escrita
-        // certa (ex.: C# em vez de Db), entao os padroes usam esses nomes.
+
         boolean menorHarmonica = GeradorDeTablatura.MODO_MENOR_HARMONICA.equals(modoNome);
         List<String> nomesDosGraus = menorHarmonica
-                ? nomesDaMenorHarmonica(notasDaEscala, usarNotacaoBemol)
-                : nomesDosGraus(notasDaEscala, usarNotacaoBemol);
+                ? nomesDaMenorHarmonica(notasDaEscala, parente, usarBemol)
+                : nomesDosGraus(notasDaEscala, parente, usarBemol);
         String notasFormatadas = "[" + String.join(", ", nomesDosGraus) + "]";
 
-        return switch (opcaoPadrao) {
+        // As pentatonicas e a menor harmonica nao tem sequencia de intervalos
+        // no PDF dos modos gregos. Na escala maior sem grego explicito, Jônio e
+        // a referencia (T 2 3 4 5 6 7+).
+        String intervalos = "";
+        if ("1".equals(modoOpcao) || modoMaior.isPresent()) {
+            intervalos = modoMaior.orElse(ModoMaior.JONIO).intervalos();
+        }
+
+        // Escolher um grego no padrao e o equivalente a pedir o shape 3NPC dele.
+        // O antigo "Shape 1" da escala maior tambem e Jonio: apenas troca o
+        // rotulo para nao mostrar o mesmo modo duas vezes no resultado.
+        String padraoEfetivo = modoGrego.isPresent() ? "3" : opcaoPadrao;
+        String nomePadraoGrego = "1".equals(modoOpcao)
+                ? modoMaior.orElse(ModoMaior.JONIO).rotulo()
+                : "Shape 1";
+
+        return switch (padraoEfetivo) {
             case "2" -> {
-                List<String> triades = menorHarmonica
-                        ? geradorDePadroes.gerarTriadesPorNomes(nomesDosGraus, modoNome)
-                        : geradorDePadroes.gerarTriades(notasDaEscala, modoNome).stream()
-                        .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
-                        .toList();
-                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades", triades, "", "");
+                // Os nomes ja chegam soletrados no ciclo certo; nao ha segunda
+                // conversao por altitude que possa gerar enarmonia divergente.
+                List<String> triades = geradorDePadroes.gerarTriadesPorNomes(nomesDosGraus, modoNome);
+                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de Triades",
+                        triades, "", "", intervalos);
             }
             case "3" -> gerarResultadoTablatura(
-                    titulo, notasFormatadas, tonicaFinal, "Shape 1", modoNome);
+                    titulo, notasFormatadas, tonicaFinal, nomePadraoGrego, modoNome, usarBemol, intervalos);
             case "4" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
-                    isPentatonica, "Shape 2", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2,
-                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2);
+                    usarBemol, isPentatonica, "Shape 2",
+                    GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2, intervalos);
             case "5" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
-                    isPentatonica, "Shape 3", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3,
-                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3);
+                    usarBemol, isPentatonica, "Shape 3",
+                    GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE3,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3, intervalos);
             case "6" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
-                    isPentatonica, "Shape 4", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE4, null);
+                    usarBemol, isPentatonica, "Shape 4",
+                    GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE4,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE4, intervalos);
             case "7" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
-                    isPentatonica, "Shape 5", GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE5, null);
+                    usarBemol, isPentatonica, "Shape 5",
+                    GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE5,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE5, intervalos);
             case "8" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
-                    isPentatonica, "Shape Extra", GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA, null);
+                    usarBemol, isPentatonica, "Shape Extra",
+                    GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA,
+                    GeradorDeTablatura.MODO_PENTATONICA_BLUES_EXTRA, intervalos);
             default -> {
-                List<String> sequencia = menorHarmonica
-                        ? geradorDePadroes.gerarSequenciaPorNomes(nomesDosGraus, 3)
-                        : geradorDePadroes.gerarSequencia(notasDaEscala, 3).stream()
-                        .map(item -> formatarTriadeParaExibicao(item, usarNotacaoBemol))
-                        .toList();
-                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas", sequencia, "", "");
+                List<String> sequencia = geradorDePadroes.gerarSequenciaPorNomes(nomesDosGraus, 3);
+                yield new ResultadoEstudo(titulo, notasFormatadas, "Sequencia de 3 Notas",
+                        sequencia, "", "", intervalos);
             }
         };
     }
@@ -153,29 +184,36 @@ public class EscalatorWebService {
 
     /** Gera a tablatura ASCII e o AlphaTex para o shape/modo informado. */
     private ResultadoEstudo gerarResultadoTablatura(String titulo, String notasFormatadas,
-                                                    Nota tonica, String nomePadrao,
-                                                    String modoParaTablatura) {
+                                                     Nota tonica, String nomePadrao,
+                                                     String modoParaTablatura, boolean usarBemol, String intervalos) {
         String[] linhasTablatura = GeradorDeTablatura.gerar(tonica.toString(), modoParaTablatura);
         String tablatura = String.join(System.lineSeparator(), linhasTablatura);
-        String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonica.toString(), modoParaTablatura);
-        return new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex);
+        String alphaTex = GeradorDeAlphaTex.gerar(titulo, tonica.toString(), modoParaTablatura, usarBemol);
+        return new ResultadoEstudo(titulo, notasFormatadas, nomePadrao, List.of(), tablatura, alphaTex, intervalos);
     }
 
     /**
-     * Resolve o shape pentatonico escolhido e gera o resultado. Quando
-     * {@code modoBlues} e nulo, o shape existe apenas na pentatonica m7.
+     * Resolve o shape pentatonico escolhido (m7 ou blues) e gera o resultado.
      */
     private ResultadoEstudo gerarResultadoShape(String titulo, String notasFormatadas, Nota tonica,
-                                                String modoNome, boolean isPentatonica,
-                                                String nomePadrao, String modoM7, String modoBlues) {
-        boolean soM7 = modoBlues == null;
-        if (!isPentatonica || (soM7 && !GeradorDeTablatura.MODO_PENTATONICA_M7.equals(modoNome))) {
-            throw new IllegalArgumentException(soM7
-                    ? "Os Shapes 4, 5 e Extra estao disponiveis apenas para a pentatonica m7."
-                    : "Os Shapes 2 e 3 estao disponiveis apenas para as pentatonicas (m7 ou blues).");
+                                                 String modoNome, boolean usarBemol, boolean isPentatonica,
+                                                 String nomePadrao, String modoM7, String modoBlues, String intervalos) {
+        if (!isPentatonica) {
+            throw new IllegalArgumentException(
+                    "Este shape esta disponivel apenas para as pentatonicas (m7 ou blues).");
         }
         String modoShape = GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome) ? modoBlues : modoM7;
-        return gerarResultadoTablatura(titulo, notasFormatadas, tonica, nomePadrao, modoShape);
+        return gerarResultadoTablatura(titulo, notasFormatadas, tonica, nomePadrao, modoShape, usarBemol, intervalos);
+    }
+
+    /** Graus da escala maior a partir da tonica do modo (ex.: D Dorico começa em D). */
+    private List<Nota> escalaMaiorRotacionada(Nota parente, Nota tonicaModo) {
+        List<Nota> notas = Escala.MAIOR.calcularNotas(parente);
+        int indice = notas.indexOf(tonicaModo);
+        if (indice > 0) {
+            Collections.rotate(notas, -indice);
+        }
+        return notas;
     }
 
     /**
@@ -189,7 +227,8 @@ public class EscalatorWebService {
         String[] partes = tonicaEntrada.trim().split("/");
         if (partes.length == 1 && "5".equals(modoOpcao)) {
             Nota menor = parseTonica(partes[0]);
-            return new ParRelativo(menor, Nota.getNotaPorValor(menor.getValor() + 3));
+            return new ParRelativo(menor, Nota.getNotaPorValor(menor.getValor() + 3),
+                    Armadura.usarBemol(partes[0]));
         }
         if (partes.length != 2) {
             throw new IllegalArgumentException("Tonica deve ser um par relativo (ex.: Am/C)");
@@ -199,7 +238,7 @@ public class EscalatorWebService {
         if (maior.getValor() != (menor.getValor() + 3) % 12) {
             throw new IllegalArgumentException("Par relativo invalido: " + tonicaEntrada);
         }
-        return new ParRelativo(menor, maior);
+        return new ParRelativo(menor, maior, Armadura.usarBemol(partes[1]));
     }
 
     private Nota parseTonica(String tonicaEntrada) {
@@ -211,63 +250,38 @@ public class EscalatorWebService {
         return Nota.valueOf(enumName);
     }
 
-    private boolean isTonicaDeBemol(Nota tonicaMaior) {
-        return TONICAS_MAIORES_DE_BEMOL.contains(tonicaMaior);
-    }
-
-    private String formatarTonicaParaExibicao(Nota tonica, boolean usarNotacaoBemol) {
-        String nomeNota = tonica.toString().replace("_SHARP", "#");
-        if (usarNotacaoBemol) {
-            return SHARP_TO_BEMOL.getOrDefault(nomeNota, nomeNota);
-        }
-        return nomeNota;
-    }
-
-    private List<String> nomesDosGraus(List<Nota> notasDaEscala, boolean usarNotacaoBemol) {
+    /** Nomes diatonicos no campo harmonico da relativa maior. */
+    private List<String> nomesDosGraus(List<Nota> notasDaEscala, Nota parente, boolean usarBemol) {
         return notasDaEscala.stream()
-                .map(nota -> formatarTonicaParaExibicao(nota, usarNotacaoBemol))
+                .map(nota -> Armadura.nomeDaNota(nota, parente, usarBemol))
                 .toList();
     }
 
     /**
      * Na menor harmonica a ultima nota e a 7maior, escrita a partir da 7ma
-     * menor: bemol vira natural (Bb -> B), natural vira sustenido (G -> G#) e,
-     * quando a 7ma menor ja e sustenida, mantem a forma enarmonica legivel
-     * (Fx -> G). Assim a partitura e os padroes mostram o acidente certo.
+     * menor (5o grau da parente maior): bemol vira natural (Bb -> B) e natural
+     * vira sustenido (G -> G#). Quando a 7ma menor ja e sustenida, mantem a
+     * forma enarmonica legivel do proprio campo harmonico.
      */
-    private List<String> nomesDaMenorHarmonica(List<Nota> notasDaEscala, boolean usarNotacaoBemol) {
+    private List<String> nomesDaMenorHarmonica(List<Nota> notasDaEscala, Nota parente, boolean usarBemol) {
         List<String> nomes = new ArrayList<>(notasDaEscala.size());
         for (int i = 0; i < notasDaEscala.size(); i++) {
             Nota nota = notasDaEscala.get(i);
             nomes.add(i == notasDaEscala.size() - 1
-                    ? nomeDaSetimaMaior(nota, usarNotacaoBemol)
-                    : formatarTonicaParaExibicao(nota, usarNotacaoBemol));
+                    ? nomeDaSetimaMaior(nota, parente, usarBemol)
+                    : Armadura.nomeDaNota(nota, parente, usarBemol));
         }
         return nomes;
     }
 
-    private String nomeDaSetimaMaior(Nota setimaMaior, boolean usarNotacaoBemol) {
-        String setimaMenor = formatarTonicaParaExibicao(
-                Nota.getNotaPorValor(setimaMaior.getValor() - 1), usarNotacaoBemol);
+    private String nomeDaSetimaMaior(Nota setimaMaior, Nota parente, boolean usarBemol) {
+        String setimaMenor = Armadura.nomeDoGrau(parente, 4, usarBemol);
         if (setimaMenor.endsWith("b")) {
             return setimaMenor.substring(0, setimaMenor.length() - 1);
         }
         if (setimaMenor.endsWith("#")) {
-            return formatarTonicaParaExibicao(setimaMaior, usarNotacaoBemol);
+            return Armadura.nomeDaNota(setimaMaior, parente, usarBemol);
         }
         return setimaMenor + "#";
-    }
-
-    private String formatarTriadeParaExibicao(String triade, boolean usarNotacaoBemol) {
-        String triadeFormatada = triade.replace("_SHARP", "#");
-        if (!usarNotacaoBemol) {
-            return triadeFormatada;
-        }
-
-        String resultado = triadeFormatada;
-        for (Map.Entry<String, String> entry : SHARP_TO_BEMOL.entrySet()) {
-            resultado = resultado.replace(entry.getKey(), entry.getValue());
-        }
-        return resultado;
     }
 }
