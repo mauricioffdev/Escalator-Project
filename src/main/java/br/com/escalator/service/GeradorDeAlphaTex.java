@@ -1,5 +1,6 @@
 package br.com.escalator.service;
 
+import br.com.escalator.model.Armadura;
 import br.com.escalator.model.Nota;
 
 import java.util.List;
@@ -24,13 +25,15 @@ import java.util.List;
  *       compassos 3 e 4 = retorno (cordas 1 a 6). {@code :8 { tu 3 }} define a
  *       tercina; {@code |} separa os compassos.</li>
  *  <li>Além do shape "3 notas por corda" (padrão), a classe renderiza as
- *       pentatônicas m7 (shapes 1 a 5 e extra) e blues (shapes 1 a 3). Os
+ *       pentatônicas m7 (shapes 1 a 5 e extra) e blues (shapes 1 a 5 e extra). Os
  *       shapes m7 1 a 5 usam 2 notas por corda em <b>semicolcheias</b>
  *       ({@code .16}, 12 por compasso 3/4); o extra usa 3 notas por corda,
  *       duas tercinas de colcheia por compasso 2/4 ({@code :8 { tu 3 }}).
- *       A blues usa semicolcheias no compasso 4/4: 14 notas + {@code r.8} no
- *       shape 1 e 15 notas + {@code r.16} nos shapes 2 e 3. Nenhuma dinâmica
- *       é adicionada.</li>
+ *       A blues usa semicolcheias no compasso 4/4: 14 notas + {@code r.8} nos
+ *       shapes 1, 4 e 5; 15 notas + {@code r.16} nos shapes 2 e 3 em 4/4. A
+ *       posicao aberta usa a mesma formatacao do extra m7: duas tercinas de
+ *       colcheia por compasso 2/4 ({@code :8 { tu 3 }}), fechando 6 compassos.
+ *       Nenhuma dinâmica é adicionada.</li>
  *  <li>{@code \instrument 29} seleciona o preset GM de guitarra com overdrive
  *       leve para a reprodução (o padrão do AlphaTex é guitarra acústica).</li>
  *  <li>{@code \ts} fixa a fórmula de compasso de cada modo e {@code \ks} a armadura
@@ -56,7 +59,7 @@ public class GeradorDeAlphaTex {
     private static final int NOTAS_POR_COMPASSO_BLUES_15 = 15;
     /** GM 29 (0-based): guitarra com overdrive leve no lugar da acústica padrão. */
     private static final String INSTRUMENTO = "\\instrument 29\n";
-    /** Duas tercinas de colcheia (6 notas) completam o compasso 2/4 do shape extra. */
+    /** Duas tercinas de colcheia (6 notas) completam o compasso 2/4 dos shapes extra. */
     private static final int NOTAS_POR_COMPASSO_2_TERCINAS = 6;
     /** Fórmulas de compasso suportadas pelo {@code \ts}. */
     private static final String COMPASSO_2_4 = "2 4";
@@ -64,7 +67,6 @@ public class GeradorDeAlphaTex {
     private static final String COMPASSO_4_4 = "4 4";
     /** Tuning padrão da guitarra: lista da corda 1 (E4 aguda) à corda 6 (E2 grave). */
     private static final String TUNING = "\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n";
-
     /**
      * Regras de renderização de cada escala: legenda do subtítulo, marcador
      *  de duração do início do compasso, sufixo de duração de cada nota,
@@ -78,7 +80,16 @@ public class GeradorDeAlphaTex {
     private GeradorDeAlphaTex() {
     }
 
+    /** Mantem o comportamento padrao (ciclo das quintas) para chamadas diretas. */
     public static String gerar(String titulo, String tonicaAlvo, String modoNome) {
+        return gerar(titulo, tonicaAlvo, modoNome, false);
+    }
+
+    /**
+     * @param usarBemol ciclo das quartas (bemois) ou das quintas (sustenidos),
+     *                  conforme o nome da tonica escolhida pelo usuario
+     */
+    public static String gerar(String titulo, String tonicaAlvo, String modoNome, boolean usarBemol) {
         List<GeradorDeTablatura.NotaTablatura> notas = GeradorDeTablatura.gerarNotas(tonicaAlvo, modoNome);
         if (notas.isEmpty()) {
             return "";
@@ -91,7 +102,7 @@ public class GeradorDeAlphaTex {
         tex.append(TUNING);
         tex.append(INSTRUMENTO);
         tex.append("\\ts ").append(config.compasso()).append('\n');
-        tex.append("\\ks ").append(nomeArmaduraPara(tonicaAlvo, modoNome)).append('\n');
+        tex.append("\\ks ").append(nomeArmaduraPara(tonicaAlvo, modoNome, usarBemol)).append('\n');
 
         int notasNoCompasso = 0;
         for (int i = 0; i < notas.size(); i++) {
@@ -120,9 +131,9 @@ public class GeradorDeAlphaTex {
      * Define as regras de renderização de acordo com o modo solicitado. Na m7,
      * os shapes 1 a 5 usam semicolcheias (12 por compasso 3/4) e o extra usa
      * duas tercinas de colcheia por compasso 2/4. A blues usa semicolcheias em
-     * 4/4: o shape 1 tem 14 notas e pausa de colcheia; os shapes 2 e 3 têm 15
-     * notas e pausa de semicolcheia. Nenhuma dinâmica é adicionada em qualquer
-     * caso.
+     * 4/4: nos shapes 1, 4 e 5 há 14 notas e pausa de colcheia; os shapes 2 e 3
+     * têm 15 notas e pausa de semicolcheia. A posicao aberta segue o extra m7:
+     * 36 notas (ida e volta) em tercina, 6 compassos de 2/4 sem pausa.
      */
     private static ConfiguracaoEstudo configuracao(String modoNome) {
         return switch (modoNome) {
@@ -132,9 +143,12 @@ public class GeradorDeAlphaTex {
                  GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE4,
                  GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE5 ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_M7, COMPASSO_3_4, "");
-            case GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA ->
+            case GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA,
+                 GeradorDeTablatura.MODO_PENTATONICA_BLUES_EXTRA ->
                     new ConfiguracaoEstudo(null, DURACAO_TERCINA, "", NOTAS_POR_COMPASSO_2_TERCINAS, COMPASSO_2_4, "");
-            case GeradorDeTablatura.MODO_PENTATONICA_BLUES ->
+            case GeradorDeTablatura.MODO_PENTATONICA_BLUES,
+                  GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE4,
+                  GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE5 ->
                     new ConfiguracaoEstudo(null, "", DURACAO_SEMICOLCHEIA, NOTAS_POR_COMPASSO_BLUES, COMPASSO_4_4, " r.8");
             case GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2,
                  GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3 ->
@@ -145,30 +159,36 @@ public class GeradorDeAlphaTex {
     }
 
     /**
-     * Converte a tônica (notação com sustenidos do enum {@code Nota}) no nome de
-     * armadura aceito pelo {@code \ks} do AlphaTex. Tons enarmônicos sem nome
-     * próprio no AlphaTex são "achatados" ({@code D#} &rarr; {@code Eb}, etc.).
+     * Escreve a armadura no ciclo harmônico escolhido pelo usuário: quintas com
+     * sustenidos (F# e C#, nunca Gb ou Db) e quartas com bemois (Gb e Cb, nunca
+     * F# ou B).
+     *
+     * <p>As pentatônicas e as menores usam a relativa maior; os modos da escala
+     * maior usam o parente (ex.: D Dorico usa {@code \ks C}). Nas menores, o
+     * nome da armadura mantém o sufixo {@code minor}, mas soletrado no ciclo
+     * correto (ex.: {@code \ks Abminor}, não {@code A#minor}).</p>
      */
-    private static String nomeArmadura(String tonica, boolean menor) {
-        String tom = switch (tonica) {
-            case "D#" -> "Eb";
-            case "G#" -> "Ab";
-            case "A#" -> "Bb";
-            default -> tonica;
-        };
-        return menor ? tom + "minor" : tom;
-    }
+    private static String nomeArmaduraPara(String tonica, String modoNome, boolean usarBemol) {
+        Nota nota = Nota.valueOf(tonica.replace("#", "_SHARP"));
 
-    /**
-     * As pentatônicas são sempre do relativo menor: a armadura correta é a da
-     * relativa maior do tom escolhido (ex.: pentatônica de Am usa {@code \ks C},
-     * a armadura de C). Os demais modos usam {@link #nomeArmadura}.
-     */
-    private static String nomeArmaduraPara(String tonica, String modoNome) {
         if (isPentatonica(modoNome)) {
-            return relativaMaior(tonica);
+            return Armadura.nomeParente(Nota.getNotaPorValor(nota.getValor() + 3), usarBemol);
         }
-        return nomeArmadura(tonica, modoNome.startsWith("Menor"));
+
+        var modo = ModoMaior.porModoTablatura(modoNome);
+        if (modo.isPresent() && modo.get().grau() > 0) {
+            Nota parente = Nota.getNotaPorValor(nota.getValor() - modo.get().grau());
+            return modo.get().relativaMenor()
+                    ? Armadura.nomeDaNota(nota, parente, usarBemol) + "minor"
+                    : Armadura.nomeParente(parente, usarBemol);
+        }
+
+        if (modoNome.startsWith("Menor")) {
+            Nota parente = Nota.getNotaPorValor(nota.getValor() + 3);
+            return Armadura.nomeDaNota(nota, parente, usarBemol) + "minor";
+        }
+
+        return Armadura.nomeDaNota(nota, nota, usarBemol);
     }
 
     private static boolean isPentatonica(String modoNome) {
@@ -180,13 +200,10 @@ public class GeradorDeAlphaTex {
                 || GeradorDeTablatura.MODO_PENTATONICA_M7_EXTRA.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)
                 || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE2.equals(modoNome)
-                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3.equals(modoNome);
-    }
-
-    private static String relativaMaior(String tonica) {
-        Nota menor = Nota.valueOf(tonica.replace("#", "_SHARP"));
-        Nota maior = Nota.getNotaPorValor(menor.getValor() + 3);
-        return nomeArmadura(maior.toString(), false);
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE3.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE4.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_SHAPE5.equals(modoNome)
+                || GeradorDeTablatura.MODO_PENTATONICA_BLUES_EXTRA.equals(modoNome);
     }
 
     private static String escapar(String texto) {
