@@ -180,18 +180,26 @@
                         <select id="padrao" name="padrao" class="form-select">
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
                             <option value="2" th:selected="${padraoSelecionado == '2'}">Sequência de tríades</option>
+                            <optgroup id="grupo-shapes-pentatonicas" label="Pentatônicas (m7 / Blues)">
+                                <option value="3" th:selected="${padraoSelecionado == '3'}">Shape 1</option>
+                                <option value="4" th:selected="${padraoSelecionado == '4'}">Shape 2</option>
+                                <option value="5" th:selected="${padraoSelecionado == '5'}">Shape 3</option>
+                                <option value="6" th:selected="${padraoSelecionado == '6'}">Shape 4</option>
+                                <option value="7" th:selected="${padraoSelecionado == '7'}">Shape 5</option>
+                                <option value="8" th:selected="${padraoSelecionado == '8'}">Shape Extra (3 oitavas)</option>
+                            </optgroup>
                             <optgroup id="grupo-modos-gregos" label="Modos gregos (Escala maior)">
                                 <option th:each="modo : ${modosGregos}"
                                         th:value="${modo.padraoOpcao}"
                                         th:text="${modo.rotulo}"
                                         th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
                             </optgroup>
-                            <option value="3" th:selected="${padraoSelecionado == '3'}">Shape 1</option>
-                            <option value="4" th:selected="${padraoSelecionado == '4'}">Shape 2</option>
-                            <option value="5" th:selected="${padraoSelecionado == '5'}">Shape 3</option>
-                            <option value="6" th:selected="${padraoSelecionado == '6'}">Shape 4</option>
-                            <option value="7" th:selected="${padraoSelecionado == '7'}">Shape 5</option>
-                            <option value="8" th:selected="${padraoSelecionado == '8'}">Shape Extra (3 oitavas)</option>
+                            <optgroup id="grupo-menor-harmonica" label="Menor Harmônica (7 shapes)">
+                                <option th:each="modo : ${modosMenorHarmonica}"
+                                        th:value="${modo.padraoOpcao}"
+                                        th:text="${modo.rotulo}"
+                                        th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -595,60 +603,65 @@
         });
     }
 
-    // Todos os shapes (2 a 5 e Extra) existem para m7 e blues. Esconde as
-    // opcoes incompativeis e volta para Shape 1 se uma estiver ativa.
-    function configurarOpcoesShape(redefinirSelecao = true) {
+    // Cada modo de estudo tem o seu proprio conjunto de padroes. Mostra apenas
+    // o grupo correspondente e troca o padrao selecionado quando ele pertence a
+    // outro modo, evitando gerar com uma combinacao invalida.
+    function configurarOpcoesPadrao(redefinirSelecao = true) {
         const selectModo = document.getElementById("modo");
         const selectPadrao = document.getElementById("padrao");
         if (!selectModo || !selectPadrao) {
             return;
         }
 
-        const grupoGrego = document.getElementById("grupo-modos-gregos");
-        const opcaoShape1 = selectPadrao.querySelector('option[value="3"]');
-        const opcoesShape = selectPadrao.querySelectorAll(
-            'option[value="4"], option[value="5"], option[value="6"], option[value="7"], option[value="8"]');
-        const opcoesGregas = selectPadrao.querySelectorAll(
-            'option[value="9"], option[value="10"], option[value="11"], option[value="12"], ' +
-            'option[value="13"], option[value="14"], option[value="15"]');
-        if (opcoesShape.length === 0 && opcoesGregas.length === 0 && !grupoGrego && !opcaoShape1) {
+        const grupos = {
+            pentatonica: document.getElementById("grupo-shapes-pentatonicas"),
+            gregos: document.getElementById("grupo-modos-gregos"),
+            menorHarmonica: document.getElementById("grupo-menor-harmonica")
+        };
+        if (!grupos.pentatonica && !grupos.gregos && !grupos.menorHarmonica) {
             return;
         }
 
-        const pentatonica = selectModo.value === "3" || selectModo.value === "4";
-        const escalaMaior = selectModo.value === "1";
-        opcoesShape.forEach(opcao => {
-            opcao.hidden = !pentatonica;
-            opcao.disabled = !pentatonica;
+        // Guarda o valor antes de esconder/desabilitar: o navegador pode mover
+        // a selecao sozinho quando o optgroup ativo deixa de existir.
+        const valorAnterior = selectPadrao.value;
+        const modo = selectModo.value;
+        const pentatonica = modo === "3" || modo === "4";
+        const escalaMaior = modo === "1";
+        const menorHarmonica = modo === "5";
+
+        const visiveis = {
+            pentatonica,
+            gregos: escalaMaior,
+            menorHarmonica
+        };
+        Object.entries(grupos).forEach(([chave, grupo]) => {
+            if (!grupo) {
+                return;
+            }
+            grupo.hidden = !visiveis[chave];
+            grupo.disabled = !visiveis[chave];
         });
-        opcoesGregas.forEach(opcao => {
-            opcao.hidden = !escalaMaior;
-            opcao.disabled = !escalaMaior;
-        });
-        if (grupoGrego) {
-            grupoGrego.hidden = !escalaMaior;
-        }
-        // Na escala maior o Shape 1 e o mesmo que Jonio (value 9), entao some
-        // do dropdown para nao deixar um segundo Jonio com outro nome.
-        if (opcaoShape1) {
-            opcaoShape1.hidden = escalaMaior;
-            opcaoShape1.disabled = escalaMaior;
-        }
 
         // Com lick ativo o select esta desabilitado e nao participa do form;
         // apenas a visibilidade e ajustada, sem alterar o valor selecionado.
         if (!redefinirSelecao) {
             return;
         }
-        if (!pentatonica && ["4", "5", "6", "7", "8"].includes(selectPadrao.value)) {
-            selectPadrao.value = "3";
+
+        const opcaoAnterior = Array.from(selectPadrao.options)
+            .find(opcao => opcao.value === valorAnterior);
+        const grupoDaOpcao = opcaoAnterior ? opcaoAnterior.parentElement : null;
+        const aindaValida = opcaoAnterior
+            && !opcaoAnterior.disabled
+            && !(grupoDaOpcao && grupoDaOpcao.tagName === "OPTGROUP" && grupoDaOpcao.hidden);
+        if (aindaValida) {
+            return;
         }
-        if (escalaMaior && selectPadrao.value === "3") {
-            selectPadrao.value = "9";
-        }
-        if (!escalaMaior && ["9", "10", "11", "12", "13", "14", "15"].includes(selectPadrao.value)) {
-            selectPadrao.value = "1";
-        }
+
+        // Na menor harmonica o antigo Shape 1 (valor 3) nao existe mais: o
+        // desenho correspondente e o Eolio 7+ (valor 16), primeiro do grupo.
+        selectPadrao.value = menorHarmonica ? "16" : escalaMaior ? "9" : "1";
     }
 
     // Quando um lick esta selecionado, os controles de escala nao sao usados.
@@ -667,14 +680,14 @@
             }
         });
 
-        configurarOpcoesShape(!lickAtivo);
+        configurarOpcoesPadrao(!lickAtivo);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
         configurarSelecaoLick();
         const selectModo = document.getElementById("modo");
         if (selectModo) {
-            selectModo.addEventListener("change", () => configurarOpcoesShape());
+            selectModo.addEventListener("change", () => configurarOpcoesPadrao());
         }
 
         const selectLick = document.getElementById("lick");

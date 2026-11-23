@@ -8,6 +8,7 @@ import br.com.escalator.service.GeradorDeLicks;
 import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
 import br.com.escalator.service.ModoMaior;
+import br.com.escalator.service.ModoMenorHarmonica;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,6 +38,16 @@ public class EscalatorWebService {
     private final GeradorDePadroes geradorDePadroes = new GeradorDePadroes();
 
     public ResultadoEstudo gerar(String modoOpcao, String tonicaEntrada, String opcaoPadrao) {
+        // Os 7 shapes da menor harmonica "viraram padroes" do mesmo jeito dos
+        // gregos. Um shape so faz sentido dentro do modo 5: sem esta guarda a
+        // combinacao cruzada cairia no case default e devolveria uma sequencia
+        // de 3 notas generica, sem tablatura, em vez do shape escolhido.
+        Optional<ModoMenorHarmonica> modoMenorHarmonica = ModoMenorHarmonica.porPadrao(opcaoPadrao);
+        if (modoMenorHarmonica.isPresent() && !"5".equals(modoOpcao)) {
+            throw new IllegalArgumentException(
+                    "Este shape esta disponivel apenas para a menor harmonica.");
+        }
+
         ParRelativo par = parseParRelativo(modoOpcao, tonicaEntrada);
 
         String modoNome;
@@ -70,11 +81,13 @@ public class EscalatorWebService {
             notasDaEscala = Escala.PENTATONICA_BLUES.calcularNotas(tonicaFinal);
             isPentatonica = true;
         } else if ("5".equals(modoOpcao)) {
-            // Menor harmonica: mesma tonica do par relativo, porem com a 7maior
-            // (T 2 3b 4 5 6b 7+, ex.: A B C D E F G#).
-            modoNome = GeradorDeTablatura.MODO_MENOR_HARMONICA;
-            tonicaFinal = par.menor();
-            notasDaEscala = Escala.MENOR_HARMONICA.calcularNotas(tonicaFinal);
+            // Menor harmonica: mesma escala de 7 notas para os 7 shapes. Sem um
+            // shape escolhido, mantem o desenho original (Eolio 7+) e a tonica
+            // digitada, preservando URLs e titulos ja validados.
+            ModoMenorHarmonica modo = modoMenorHarmonica.orElse(ModoMenorHarmonica.EOLIO_7);
+            modoNome = modo.modoTablatura();
+            tonicaFinal = Nota.getNotaPorValor(par.menor().getValor() + modo.grau());
+            notasDaEscala = escalaMenorHarmonicaRotacionada(par.menor(), tonicaFinal);
             isPentatonica = false;
         } else if (modoMaior.isPresent()) {
             ModoMaior modo = modoMaior.get();
@@ -93,41 +106,64 @@ public class EscalatorWebService {
         // MESMA soletracao diatonica do campo harmonico em Armadura. O ciclo e o
         // do nome digitado: quintas -> sustenidos, quartas -> bemois.
         boolean usarBemol = par.usarBemol();
+        boolean menorHarmonica = "5".equals(modoOpcao);
         Nota parente = par.maior();
-        String nomeExibicaoTonicaFinal = Armadura.nomeDaNota(tonicaFinal, parente, usarBemol);
+        // Na menor harmonica o root de alguns modos e a 7ma elevada do parente
+        // (ex.: G# em Am). O titulo deve usar a MESMA soletracao da escala,
+        // senao aparece "Db Diminuto" com primeira nota "C#" na mesma saida.
+        String nomeExibicaoTonicaFinal = menorHarmonica
+                && tonicaFinal.getValor() == (parente.getValor() + 8) % 12
+                ? nomeDaSetimaMaior(tonicaFinal, parente, usarBemol)
+                : Armadura.nomeDaNota(tonicaFinal, parente, usarBemol);
 
         String titulo;
         if (isPentatonica) {
+            // O h2 do resultado usa text-transform: uppercase, entao um "m"
+            // minusculo viraria "M" e confundiria com modo maior. Escrever
+            // "A Menor" mantem a informacao legivel em qualquer fonte.
             if (GeradorDeTablatura.MODO_PENTATONICA_BLUES.equals(modoNome)) {
-                titulo = "Pentatonica Blues " + nomeExibicaoTonicaFinal + "m";
+                titulo = "Pentatonica Blues " + nomeExibicaoTonicaFinal + " Menor";
             } else {
-                titulo = "Pentatonica de " + nomeExibicaoTonicaFinal + "m";
+                titulo = "Pentatonica de " + nomeExibicaoTonicaFinal + " Menor";
             }
         } else {
             titulo = nomeExibicaoTonicaFinal + " " + modoNome;
         }
 
-        boolean menorHarmonica = GeradorDeTablatura.MODO_MENOR_HARMONICA.equals(modoNome);
         List<String> nomesDosGraus = menorHarmonica
                 ? nomesDaMenorHarmonica(notasDaEscala, parente, usarBemol)
                 : nomesDosGraus(notasDaEscala, parente, usarBemol);
         String notasFormatadas = "[" + String.join(", ", nomesDosGraus) + "]";
 
-        // As pentatonicas e a menor harmonica nao tem sequencia de intervalos
-        // no PDF dos modos gregos. Na escala maior sem grego explicito, Jônio e
-        // a referencia (T 2 3 4 5 6 7+).
+        // As pentatonicas nao tem sequencia de intervalos nos PDFs. Na escala
+        // maior sem grego explicito, Jonio e a referencia; na menor harmonica,
+        // o desenho original (Eolio 7+) e a referencia quando nenhum shape e
+        // escolhido.
         String intervalos = "";
-        if ("1".equals(modoOpcao) || modoMaior.isPresent()) {
+        if ("5".equals(modoOpcao)) {
+            intervalos = modoMenorHarmonica.orElse(ModoMenorHarmonica.EOLIO_7).intervalos();
+        } else if ("1".equals(modoOpcao) || modoMaior.isPresent()) {
             intervalos = modoMaior.orElse(ModoMaior.JONIO).intervalos();
         }
 
-        // Escolher um grego no padrao e o equivalente a pedir o shape 3NPC dele.
-        // O antigo "Shape 1" da escala maior tambem e Jonio: apenas troca o
-        // rotulo para nao mostrar o mesmo modo duas vezes no resultado.
-        String padraoEfetivo = modoGrego.isPresent() ? "3" : opcaoPadrao;
-        String nomePadraoGrego = "1".equals(modoOpcao)
-                ? modoMaior.orElse(ModoMaior.JONIO).rotulo()
-                : "Shape 1";
+        // Escolher um grego (ou um modo da menor harmonica) no padrao e o
+        // equivalente a pedir o shape 3NPC dele. O antigo "Shape 1" da escala
+        // maior tambem e Jonio: apenas troca o rotulo para nao mostrar o mesmo
+        // modo duas vezes no resultado.
+        String padraoEfetivo;
+        String nomePadrao;
+        if (modoGrego.isPresent()) {
+            padraoEfetivo = "3";
+            nomePadrao = modoGrego.get().rotulo();
+        } else if (modoMenorHarmonica.isPresent()) {
+            padraoEfetivo = "3";
+            nomePadrao = modoMenorHarmonica.get().rotulo();
+        } else {
+            padraoEfetivo = opcaoPadrao;
+            nomePadrao = "1".equals(modoOpcao)
+                    ? modoMaior.orElse(ModoMaior.JONIO).rotulo()
+                    : "Shape 1";
+        }
 
         return switch (padraoEfetivo) {
             case "2" -> {
@@ -138,7 +174,7 @@ public class EscalatorWebService {
                         triades, "", "", intervalos);
             }
             case "3" -> gerarResultadoTablatura(
-                    titulo, notasFormatadas, tonicaFinal, nomePadraoGrego, modoNome, usarBemol, intervalos);
+                    titulo, notasFormatadas, tonicaFinal, nomePadrao, modoNome, usarBemol, intervalos);
             case "4" -> gerarResultadoShape(titulo, notasFormatadas, tonicaFinal, modoNome,
                     usarBemol, isPentatonica, "Shape 2",
                     GeradorDeTablatura.MODO_PENTATONICA_M7_SHAPE2,
@@ -216,6 +252,16 @@ public class EscalatorWebService {
         return notas;
     }
 
+    /** Graus da menor harmonica a partir do root do shape (ex.: B Locrio 6). */
+    private List<Nota> escalaMenorHarmonicaRotacionada(Nota tonica, Nota tonicaModo) {
+        List<Nota> notas = Escala.MENOR_HARMONICA.calcularNotas(tonica);
+        int indice = notas.indexOf(tonicaModo);
+        if (indice > 0) {
+            Collections.rotate(notas, -indice);
+        }
+        return notas;
+    }
+
     /**
      * Aceita o par relativo (ex.: Am/C) e, apenas na menor harmonica, tambem a
      * tonica menor sozinha (ex.: Am), ja que essa escala nao tem relativo maior.
@@ -264,10 +310,14 @@ public class EscalatorWebService {
      * forma enarmonica legivel do proprio campo harmonico.
      */
     private List<String> nomesDaMenorHarmonica(List<Nota> notasDaEscala, Nota parente, boolean usarBemol) {
+        // A 7maior fica um semiton acima da 7ma menor do parente (grau 4),
+        // qualquer que seja a rotacao do modo. Identifica-la pela altitude
+        // evita aplicar a regra na ultima nota quando a escala comeca em outro
+        // grau (ex.: G# encontra no meio da sequencia no Locrio 6 de Am).
+        int valorSetimaMaior = (parente.getValor() + 8) % 12;
         List<String> nomes = new ArrayList<>(notasDaEscala.size());
-        for (int i = 0; i < notasDaEscala.size(); i++) {
-            Nota nota = notasDaEscala.get(i);
-            nomes.add(i == notasDaEscala.size() - 1
+        for (Nota nota : notasDaEscala) {
+            nomes.add(nota.getValor() == valorSetimaMaior
                     ? nomeDaSetimaMaior(nota, parente, usarBemol)
                     : Armadura.nomeDaNota(nota, parente, usarBemol));
         }

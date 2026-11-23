@@ -183,6 +183,14 @@ public class GeradorDeAlphaTex {
                     : Armadura.nomeParente(parente, usarBemol);
         }
 
+        // Nos 7 shapes da menor harmonica a armadura e do PARENTE menor (ex.:
+        // B Locrio 6 de Am continua em Aminor), nunca do root do modo.
+        var modoHarmonica = ModoMenorHarmonica.porModoTablatura(modoNome);
+        if (modoHarmonica.isPresent() && modoHarmonica.get().grau() > 0) {
+            Nota parente = Nota.getNotaPorValor(nota.getValor() - modoHarmonica.get().grau());
+            return Armadura.nomeDaNota(parente, parente, usarBemol) + "minor";
+        }
+
         if (modoNome.startsWith("Menor")) {
             Nota parente = Nota.getNotaPorValor(nota.getValor() + 3);
             return Armadura.nomeDaNota(nota, parente, usarBemol) + "minor";

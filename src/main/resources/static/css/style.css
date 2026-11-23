@@ -314,6 +314,14 @@ h1.display-6 {
     text-shadow: 0 0 12px rgba(240, 165, 0, 0.08);
 }
 
+/* Sequencias de notas/triades usam a mesma cor legivel da tablatura. O
+   Bootstrap define --bs-list-group-color a partir de --bs-body-color (#212529),
+   que fica escuro sobre o fundo dark; por isso o escopo .result e o !important. */
+.result .list-group-item {
+    --bs-list-group-color: var(--text);
+    color: var(--text) !important;
+}
+
 .list-group-item {
     background: transparent;
     font-family: "IBM Plex Mono", monospace;

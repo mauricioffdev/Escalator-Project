@@ -4,6 +4,7 @@ import br.com.escalator.rag.PdfTabExtractor;
 import br.com.escalator.service.GeradorDeAlphaTex;
 import br.com.escalator.service.GeradorDeTablatura;
 import br.com.escalator.service.ModoMaior;
+import br.com.escalator.service.ModoMenorHarmonica;
 import br.com.escalator.web.EscalatorWebService;
 import br.com.escalator.web.ResultadoEstudo;
 import org.junit.jupiter.api.Test;
@@ -218,11 +219,19 @@ class ModosAuditoriaTest {
     }
 
     @Test
-    void pentatonicasEMenorHarmonicaNaoTemIntervalosDosGregos() {
+    void pentatonicasNaoTemIntervalosEMenorHarmonicaUsaOsDoPdf() {
         EscalatorWebService service = new EscalatorWebService();
         assertTrue(service.gerar("3", "Am/C", "3").intervalos().isEmpty());
         assertTrue(service.gerar("4", "Am/C", "3").intervalos().isEmpty());
-        assertTrue(service.gerar("5", "Am", "3").intervalos().isEmpty());
+        assertEquals(ModoMenorHarmonica.EOLIO_7.intervalos(),
+                service.gerar("5", "Am", "3").intervalos());
+    }
+
+    @Test
+    void tituloDasPentatonicasDeixaClaroQueEMenor() {
+        EscalatorWebService service = new EscalatorWebService();
+        assertEquals("Pentatonica de A Menor", service.gerar("3", "Am/C", "3").titulo());
+        assertEquals("Pentatonica Blues A Menor", service.gerar("4", "Am/C", "3").titulo());
     }
 
     @Test
