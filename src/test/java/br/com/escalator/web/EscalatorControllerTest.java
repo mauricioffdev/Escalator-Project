@@ -80,4 +80,40 @@ class EscalatorControllerTest {
         assertEquals("Shape 2",
                 ((ResultadoEstudo) pentatonica.getAttribute("resultado")).nomePadrao());
     }
+
+    @Test
+    void modos11E12SempreRecebemUmShapeDaPropriaFamilia() {
+        ExtendedModelMap m7 = new ExtendedModelMap();
+        controller.index("11", "Am/C", "1", "", true, m7);
+        assertEquals("23", m7.getAttribute("padraoSelecionado"));
+        assertNull(m7.getAttribute("erro"));
+        assertNotNull(m7.getAttribute("resultado"));
+
+        ExtendedModelMap m6 = new ExtendedModelMap();
+        controller.index("12", "Am/C", "8", "", true, m6);
+        assertEquals("29", m6.getAttribute("padraoSelecionado"));
+        assertNull(m6.getAttribute("erro"));
+        assertNotNull(m6.getAttribute("resultado"));
+    }
+
+    @Test
+    void controllerDisponibilizaOsDoisGruposNovosNoTemplate() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.index("11", "Am/C", "23", "", false, model);
+
+        assertNotNull(model.getAttribute("modosPentatonicaM7"));
+        assertNotNull(model.getAttribute("modosPentatonicaM6"));
+        assertEquals(6, ((Object[]) model.getAttribute("modosPentatonicaM7")).length);
+        assertEquals(6, ((Object[]) model.getAttribute("modosPentatonicaM6")).length);
+    }
+
+    @Test
+    void shapeNovoForaDoSeuModoMostraMensagemEspecifica() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.index("3", "Am/C", "24", "", true, model);
+
+        assertEquals("Este shape esta disponivel apenas para a pentatonica M7.",
+                model.getAttribute("erro"));
+        assertNull(model.getAttribute("resultado"));
+    }
 }

@@ -9,6 +9,8 @@ import br.com.escalator.service.GeradorDePadroes;
 import br.com.escalator.service.GeradorDeTablatura;
 import br.com.escalator.service.ModoMaior;
 import br.com.escalator.service.ModoMenorHarmonica;
+import br.com.escalator.service.PentatonicaM6;
+import br.com.escalator.service.PentatonicaM7;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,6 +49,23 @@ public class EscalatorWebService {
             throw new IllegalArgumentException(
                     "Este shape esta disponivel apenas para a menor harmonica.");
         }
+        // Os shapes das duas pentatonicas novas tambem sao exclusivos do seu
+        // modo. Sem esta guarda uma URL cruzada cairia no default e mostraria
+        // uma sequencia generica em vez do desenho escolhido.
+        Optional<PentatonicaM7> padraoM7 = PentatonicaM7.porPadrao(opcaoPadrao);
+        Optional<PentatonicaM6> padraoM6 = PentatonicaM6.porPadrao(opcaoPadrao);
+        if (padraoM7.isPresent() && !PentatonicaM7.MODO_OPCAO.equals(modoOpcao)) {
+            throw new IllegalArgumentException(
+                    "Este shape esta disponivel apenas para a pentatonica M7.");
+        }
+        if (padraoM6.isPresent() && !PentatonicaM6.MODO_OPCAO.equals(modoOpcao)) {
+            throw new IllegalArgumentException(
+                    "Este shape esta disponivel apenas para a pentatonica m6.");
+        }
+        PentatonicaM7 shapeM7 = PentatonicaM7.MODO_OPCAO.equals(modoOpcao)
+                ? padraoM7.orElse(PentatonicaM7.SHAPE_1) : null;
+        PentatonicaM6 shapeM6 = PentatonicaM6.MODO_OPCAO.equals(modoOpcao)
+                ? padraoM6.orElse(PentatonicaM6.SHAPE_1) : null;
 
         ParRelativo par = parseParRelativo(modoOpcao, tonicaEntrada);
 
@@ -89,6 +108,16 @@ public class EscalatorWebService {
             tonicaFinal = Nota.getNotaPorValor(par.menor().getValor() + modo.grau());
             notasDaEscala = escalaMenorHarmonicaRotacionada(par.menor(), tonicaFinal);
             isPentatonica = false;
+        } else if (shapeM7 != null) {
+            modoNome = shapeM7.modoTablatura();
+            tonicaFinal = par.menor();
+            notasDaEscala = Escala.PENTATONICA_MAIOR_M7.calcularNotas(tonicaFinal);
+            isPentatonica = true;
+        } else if (shapeM6 != null) {
+            modoNome = shapeM6.modoTablatura();
+            tonicaFinal = par.menor();
+            notasDaEscala = Escala.PENTATONICA_M6.calcularNotas(tonicaFinal);
+            isPentatonica = true;
         } else if (modoMaior.isPresent()) {
             ModoMaior modo = modoMaior.get();
             modoNome = modo.modoTablatura();
@@ -107,7 +136,15 @@ public class EscalatorWebService {
         // do nome digitado: quintas -> sustenidos, quartas -> bemois.
         boolean usarBemol = par.usarBemol();
         boolean menorHarmonica = "5".equals(modoOpcao);
-        Nota parente = par.maior();
+        // Cada pentatonica nova guarda seu parente no proprio enum: M7 usa a
+        // quarta justa (A -> D) e m6 a setima menor (A -> G), unicos campos
+        // harmonicos que contem as notas impressas em cada PDF. Nas demais
+        // pentatonicas continua valendo a relativa maior (A -> C).
+        Nota parente = shapeM7 != null
+                ? Nota.getNotaPorValor(par.menor().getValor() + PentatonicaM7.SALTO_PARENTE)
+                : shapeM6 != null
+                ? Nota.getNotaPorValor(par.menor().getValor() + PentatonicaM6.SALTO_PARENTE)
+                : par.maior();
         // Na menor harmonica o root de alguns modos e a 7ma elevada do parente
         // (ex.: G# em Am). O titulo deve usar a MESMA soletracao da escala,
         // senao aparece "Db Diminuto" com primeira nota "C#" na mesma saida.
@@ -117,7 +154,12 @@ public class EscalatorWebService {
                 : Armadura.nomeDaNota(tonicaFinal, parente, usarBemol);
 
         String titulo;
-        if (isPentatonica) {
+        if (shapeM7 != null) {
+            titulo = "Pentatonica M7 de " + nomeExibicaoTonicaFinal;
+        } else if (shapeM6 != null) {
+            // "A Menor" evita o "Am" que o CSS colocaria em maiusculas.
+            titulo = "Pentatonica m6 de " + nomeExibicaoTonicaFinal + " Menor";
+        } else if (isPentatonica) {
             // O h2 do resultado usa text-transform: uppercase, entao um "m"
             // minusculo viraria "M" e confundiria com modo maior. Escrever
             // "A Menor" mantem a informacao legivel em qualquer fonte.
@@ -140,7 +182,11 @@ public class EscalatorWebService {
         // o desenho original (Eolio 7+) e a referencia quando nenhum shape e
         // escolhido.
         String intervalos = "";
-        if ("5".equals(modoOpcao)) {
+        if (shapeM7 != null) {
+            intervalos = PentatonicaM7.INTERVALOS;
+        } else if (shapeM6 != null) {
+            intervalos = PentatonicaM6.INTERVALOS;
+        } else if ("5".equals(modoOpcao)) {
             intervalos = modoMenorHarmonica.orElse(ModoMenorHarmonica.EOLIO_7).intervalos();
         } else if ("1".equals(modoOpcao) || modoMaior.isPresent()) {
             intervalos = modoMaior.orElse(ModoMaior.JONIO).intervalos();
@@ -163,6 +209,15 @@ public class EscalatorWebService {
             nomePadrao = "1".equals(modoOpcao)
                     ? modoMaior.orElse(ModoMaior.JONIO).rotulo()
                     : "Shape 1";
+        }
+
+        if (shapeM7 != null) {
+            return gerarResultadoTablatura(titulo, notasFormatadas, tonicaFinal,
+                    shapeM7.rotulo(), modoNome, usarBemol, intervalos);
+        }
+        if (shapeM6 != null) {
+            return gerarResultadoTablatura(titulo, notasFormatadas, tonicaFinal,
+                    shapeM6.rotulo(), modoNome, usarBemol, intervalos);
         }
 
         return switch (padraoEfetivo) {

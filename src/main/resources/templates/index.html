@@ -161,10 +161,13 @@
                     <div class="col-12 col-md-4">
                         <label for="modo" class="form-label">Modo de estudo</label>
                         <select id="modo" name="modo" class="form-select">
-                            <option value="1" th:selected="${modoSelecionado == '1'}">Escala maior (modos gregos)</option>
                             <option value="3" th:selected="${modoSelecionado == '3'}">Pentatonica m7</option>
                             <option value="4" th:selected="${modoSelecionado == '4'}">Pentatonica Blues</option>
+                            <option value="1" th:selected="${modoSelecionado == '1'}">Modos Gregos (Escala maior)</option>
+                            <option value="12" th:selected="${modoSelecionado == '12'}">Pentatonica m6</option>
+                            <option value="11" th:selected="${modoSelecionado == '11'}">Pentatonica M7</option>
                             <option value="5" th:selected="${modoSelecionado == '5'}">Menor Harmônica</option>
+                            <option value="" disabled>Menor melódica (futuro)</option>
                         </select>
                     </div>
 
@@ -190,6 +193,18 @@
                             </optgroup>
                             <optgroup id="grupo-modos-gregos" label="Modos gregos (Escala maior)">
                                 <option th:each="modo : ${modosGregos}"
+                                        th:value="${modo.padraoOpcao}"
+                                        th:text="${modo.rotulo}"
+                                        th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
+                            </optgroup>
+                            <optgroup id="grupo-pentatonica-m6" label="Pentatônica m6 (6 shapes)">
+                                <option th:each="modo : ${modosPentatonicaM6}"
+                                        th:value="${modo.padraoOpcao}"
+                                        th:text="${modo.rotulo}"
+                                        th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
+                            </optgroup>
+                            <optgroup id="grupo-pentatonica-m7" label="Pentatônica M7 (6 shapes)">
+                                <option th:each="modo : ${modosPentatonicaM7}"
                                         th:value="${modo.padraoOpcao}"
                                         th:text="${modo.rotulo}"
                                         th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
@@ -276,7 +291,7 @@
         // Vazio/nulo => a pagina nao renderiza a tablatura visual (compatibilidade)
         window.alphaTabTex = [[${resultado != null && resultado.tablaturaAlphaTex != null ? resultado.tablaturaAlphaTex : ''}]];
         // Pentatonicas (modos 3 e 4) usam tab maior; escalas maiores/menores usam o tamanho original
-        window.tabScale = [[${resultado != null and (modoSelecionado == '3' or modoSelecionado == '4')}]] ? 1.5 : 1.25;
+        window.tabScale = [[${resultado != null and (modoSelecionado == '3' or modoSelecionado == '4' or modoSelecionado == '11' or modoSelecionado == '12')}]] ? 1.5 : 1.25;
     })();
 </script>
 
@@ -615,10 +630,12 @@
 
         const grupos = {
             pentatonica: document.getElementById("grupo-shapes-pentatonicas"),
+            pentatonicaM7: document.getElementById("grupo-pentatonica-m7"),
+            pentatonicaM6: document.getElementById("grupo-pentatonica-m6"),
             gregos: document.getElementById("grupo-modos-gregos"),
             menorHarmonica: document.getElementById("grupo-menor-harmonica")
         };
-        if (!grupos.pentatonica && !grupos.gregos && !grupos.menorHarmonica) {
+        if (!Object.values(grupos).some(Boolean)) {
             return;
         }
 
@@ -627,11 +644,15 @@
         const valorAnterior = selectPadrao.value;
         const modo = selectModo.value;
         const pentatonica = modo === "3" || modo === "4";
+        const pentatonicaM7 = modo === "11";
+        const pentatonicaM6 = modo === "12";
         const escalaMaior = modo === "1";
         const menorHarmonica = modo === "5";
 
         const visiveis = {
             pentatonica,
+            pentatonicaM7,
+            pentatonicaM6,
             gregos: escalaMaior,
             menorHarmonica
         };
@@ -661,7 +682,10 @@
 
         // Na menor harmonica o antigo Shape 1 (valor 3) nao existe mais: o
         // desenho correspondente e o Eolio 7+ (valor 16), primeiro do grupo.
-        selectPadrao.value = menorHarmonica ? "16" : escalaMaior ? "9" : "1";
+        selectPadrao.value = menorHarmonica ? "16"
+            : pentatonicaM7 ? "23"
+            : pentatonicaM6 ? "29"
+            : escalaMaior ? "9" : "1";
     }
 
     // Quando um lick esta selecionado, os controles de escala nao sao usados.

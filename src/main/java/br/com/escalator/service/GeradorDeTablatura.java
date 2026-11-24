@@ -33,6 +33,20 @@ public class GeradorDeTablatura {
     public static final String MODO_PENTATONICA_M7_SHAPE5 = "pentatonica m7 shape 5";
     /** Shape extra da folha: posição aberta de 3 oitavas. */
     public static final String MODO_PENTATONICA_M7_EXTRA = "pentatonica m7 extra";
+    /** Pentatonica M7 (T 3 4 5 7) do PDF pentaM7.pdf, referencia em A. */
+    public static final String MODO_PENTATONICA_M7_A = "pentatonica M7 A";
+    public static final String MODO_PENTATONICA_M7_A_SHAPE2 = "pentatonica M7 A shape 2";
+    public static final String MODO_PENTATONICA_M7_A_SHAPE3 = "pentatonica M7 A shape 3";
+    public static final String MODO_PENTATONICA_M7_A_SHAPE4 = "pentatonica M7 A shape 4";
+    public static final String MODO_PENTATONICA_M7_A_SHAPE5 = "pentatonica M7 A shape 5";
+    public static final String MODO_PENTATONICA_M7_A_EXTRA = "pentatonica M7 A extra";
+    /** Pentatonica m6 (T 3b 4 5 6) do PDF pentam6.pdf, referencia em Am. */
+    public static final String MODO_PENTATONICA_M6_A = "pentatonica m6 A";
+    public static final String MODO_PENTATONICA_M6_A_SHAPE2 = "pentatonica m6 A shape 2";
+    public static final String MODO_PENTATONICA_M6_A_SHAPE3 = "pentatonica m6 A shape 3";
+    public static final String MODO_PENTATONICA_M6_A_SHAPE4 = "pentatonica m6 A shape 4";
+    public static final String MODO_PENTATONICA_M6_A_SHAPE5 = "pentatonica m6 A shape 5";
+    public static final String MODO_PENTATONICA_M6_A_EXTRA = "pentatonica m6 A extra";
     /** Eolio 7+ da menor harmonica: substitui o desenho anterior pelo shape do PDF. */
     public static final String MODO_MENOR_HARMONICA = "Menor Harmônica";
     /** Demais modos da menor harmonica, na ordem dos shapes do PDF. */
@@ -115,6 +129,18 @@ public class GeradorDeTablatura {
     private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE4_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE5_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_EXTRA_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_SHAPE2_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_SHAPE3_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_SHAPE4_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_SHAPE5_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M7_A_EXTRA_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_SHAPE2_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_SHAPE3_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_SHAPE4_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_SHAPE5_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_PENTATONICA_M6_A_EXTRA_TRANSPOABLE;
     private static final Map<String, Integer> NOTAS_NA_CORDA_E;
 
     static {
@@ -351,6 +377,88 @@ public class GeradorDeTablatura {
         notasPentatonicaBluesExtra.put("E_high", Arrays.asList(new NotaTab(11, 50),
                 new NotaTab(12, 53), new NotaTab(15, 56)));
         SHAPE_PENTATONICA_BLUES_EXTRA_TRANSPOABLE = new ShapeMestre(notasPentatonicaBluesExtra, 60);
+
+        // Pentatonica M7 e pentatonica m6 dos PDFs pentaM7.pdf e pentam6.pdf.
+        // As casas foram lidas pela posicao horizontal dos dedos impressos e
+        // conferidas nota a nota contra os intervalos de cada folha. A ancora
+        // continua sendo A na casa 5 da corda E grave, igual as pentatonicas
+        // m7/blues ja validadas.
+        SHAPE_PENTATONICA_M7_A_TRANSPOABLE = shape2Pentatonica(
+                new int[]{5, 9}, new int[]{5, 7}, new int[]{5, 7},
+                new int[]{6, 7}, new int[]{5, 8}, new int[]{5, 9});
+        SHAPE_PENTATONICA_M7_A_SHAPE2_TRANSPOABLE = shape2Pentatonica(
+                new int[]{9, 10}, new int[]{7, 10}, new int[]{7, 11},
+                new int[]{7, 9}, new int[]{8, 10}, new int[]{9, 10});
+        SHAPE_PENTATONICA_M7_A_SHAPE3_TRANSPOABLE = shape2Pentatonica(
+                new int[]{10, 12}, new int[]{10, 12}, new int[]{11, 12},
+                new int[]{9, 12}, new int[]{10, 14}, new int[]{10, 12});
+        SHAPE_PENTATONICA_M7_A_SHAPE4_TRANSPOABLE = shape2Pentatonica(
+                new int[]{12, 15}, new int[]{12, 16}, new int[]{12, 14},
+                new int[]{12, 14}, new int[]{14, 15}, new int[]{12, 15});
+        SHAPE_PENTATONICA_M7_A_SHAPE5_TRANSPOABLE = shape2Pentatonica(
+                new int[]{15, 17}, new int[]{16, 17}, new int[]{14, 17},
+                new int[]{14, 18}, new int[]{15, 17}, new int[]{15, 17});
+
+        // Extra M7 ("3 oitavas"): 12 notas na subida, duas por corda, com o Lá
+        // da casa 17 da E aguda removido para fechar 3/4. A volta espelha o
+        // desenho a partir do Mi da casa 12, sem pausas.
+        Map<String, List<NotaTab>> notasPentatonicaM7AExtra = new HashMap<>();
+        notasPentatonicaM7AExtra.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(9, 5)));
+        notasPentatonicaM7AExtra.put("A", Arrays.asList(new NotaTab(5, 11), new NotaTab(7, 14)));
+        notasPentatonicaM7AExtra.put("D", Arrays.asList(new NotaTab(7, 20), new NotaTab(11, 23)));
+        notasPentatonicaM7AExtra.put("G", Arrays.asList(new NotaTab(7, 31), new NotaTab(9, 34)));
+        notasPentatonicaM7AExtra.put("B", Arrays.asList(new NotaTab(10, 40), new NotaTab(14, 43)));
+        notasPentatonicaM7AExtra.put("E_high", Arrays.asList(new NotaTab(10, 50),
+                new NotaTab(12, 53)));
+        SHAPE_PENTATONICA_M7_A_EXTRA_TRANSPOABLE = new ShapeMestre(notasPentatonicaM7AExtra, 58);
+
+        SHAPE_PENTATONICA_M6_A_TRANSPOABLE = shape2Pentatonica(
+                new int[]{5, 8}, new int[]{5, 7}, new int[]{4, 7},
+                new int[]{5, 7}, new int[]{5, 7}, new int[]{5, 8});
+        SHAPE_PENTATONICA_M6_A_SHAPE2_TRANSPOABLE = shape2Pentatonica(
+                new int[]{8, 10}, new int[]{7, 9}, new int[]{7, 10},
+                new int[]{7, 9}, new int[]{7, 10}, new int[]{8, 10});
+        SHAPE_PENTATONICA_M6_A_SHAPE3_TRANSPOABLE = shape2Pentatonica(
+                new int[]{10, 12}, new int[]{9, 12}, new int[]{10, 12},
+                new int[]{9, 11}, new int[]{10, 13}, new int[]{10, 12});
+        SHAPE_PENTATONICA_M6_A_SHAPE4_TRANSPOABLE = shape2Pentatonica(
+                new int[]{12, 14}, new int[]{12, 15}, new int[]{12, 14},
+                new int[]{11, 14}, new int[]{13, 15}, new int[]{12, 14});
+        SHAPE_PENTATONICA_M6_A_SHAPE5_TRANSPOABLE = shape2Pentatonica(
+                new int[]{14, 17}, new int[]{15, 17}, new int[]{14, 16},
+                new int[]{14, 17}, new int[]{15, 17}, new int[]{14, 17});
+
+        // Extra m6 ("Penta m7blues + Penta m6"): desenho de 16 notas na subida
+        // que mistura D# e G do blues com F# da pentatonica m6.
+        Map<String, List<NotaTab>> notasPentatonicaM6AExtra = new HashMap<>();
+        notasPentatonicaM6AExtra.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(8, 5)));
+        notasPentatonicaM6AExtra.put("A", Arrays.asList(new NotaTab(5, 11),
+                new NotaTab(6, 14), new NotaTab(7, 17)));
+        notasPentatonicaM6AExtra.put("D", Arrays.asList(new NotaTab(4, 20),
+                new NotaTab(5, 23), new NotaTab(7, 26)));
+        notasPentatonicaM6AExtra.put("G", Arrays.asList(new NotaTab(5, 31),
+                new NotaTab(7, 34), new NotaTab(8, 37)));
+        notasPentatonicaM6AExtra.put("B", Arrays.asList(new NotaTab(5, 40),
+                new NotaTab(7, 43), new NotaTab(8, 46)));
+        notasPentatonicaM6AExtra.put("E_high", Arrays.asList(new NotaTab(5, 50), new NotaTab(8, 53)));
+        SHAPE_PENTATONICA_M6_A_EXTRA_TRANSPOABLE = new ShapeMestre(notasPentatonicaM6AExtra, 60);
+    }
+
+    /** Monta um shape de 2 notas por corda com o layout das pentatonicas m7/blues. */
+    private static ShapeMestre shape2Pentatonica(int[] eLow, int[] a, int[] d,
+                                                 int[] g, int[] b, int[] eHigh) {
+        String[] cordas = {"E_low", "A", "D", "G", "B", "E_high"};
+        int[] posicoes = {2, 8, 14, 20, 26, 32};
+        int[][] frets = {eLow, a, d, g, b, eHigh};
+        Map<String, List<NotaTab>> notas = new HashMap<>();
+        for (int corda = 0; corda < cordas.length; corda++) {
+            List<NotaTab> notasDaCorda = new ArrayList<>();
+            for (int i = 0; i < 2; i++) {
+                notasDaCorda.add(new NotaTab(frets[corda][i], posicoes[corda] + i * 3));
+            }
+            notas.put(cordas[corda], notasDaCorda);
+        }
+        return new ShapeMestre(notas, 38);
     }
 
     /**
@@ -472,6 +580,42 @@ public class GeradorDeTablatura {
             casaTonicaMestre = 5;
         } else if (MODO_PENTATONICA_BLUES_EXTRA.equals(modoNome)) {
             shapeBase = SHAPE_PENTATONICA_BLUES_EXTRA_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A_SHAPE2.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_SHAPE2_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A_SHAPE3.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_SHAPE3_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A_SHAPE4.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_SHAPE4_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A_SHAPE5.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_SHAPE5_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M7_A_EXTRA.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M7_A_EXTRA_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A_SHAPE2.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_SHAPE2_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A_SHAPE3.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_SHAPE3_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A_SHAPE4.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_SHAPE4_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A_SHAPE5.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_SHAPE5_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_PENTATONICA_M6_A_EXTRA.equals(modoNome)) {
+            shapeBase = SHAPE_PENTATONICA_M6_A_EXTRA_TRANSPOABLE;
             casaTonicaMestre = 5;
         } else if (MODO_DORICO.equals(modoNome)) {
             shapeBase = SHAPE_3NPC_DORICO_TRANSPOABLE;
