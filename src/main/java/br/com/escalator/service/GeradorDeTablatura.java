@@ -62,6 +62,21 @@ public class GeradorDeTablatura {
             MODO_MENOR_HARMONICA_JONIO_5SUST, MODO_MENOR_HARMONICA_DORICO_4SUST,
             MODO_MENOR_HARMONICA_FRIGIO_DOMINANTE, MODO_MENOR_HARMONICA_LIDIO_9SUST,
             MODO_MENOR_HARMONICA_DIMINUTO);
+    /** Primeiro shape da menor melodica: substitui o desenho generico de A menor. */
+    public static final String MODO_MENOR_MELODICA = "Menor Melódica";
+    /** Demais modos da menor melodica, na ordem dos shapes do PDF. */
+    public static final String MODO_MENOR_MELODICA_FRIGIO_6 = "Frígio 6";
+    public static final String MODO_MENOR_MELODICA_LIDIO_5SUST = "Lídio 5#";
+    public static final String MODO_MENOR_MELODICA_MIXO_4SUST = "Mixo 4#";
+    public static final String MODO_MENOR_MELODICA_MIXO_6B = "Mixo 6b";
+    public static final String MODO_MENOR_MELODICA_LOCRIO_9 = "Lócrio 9";
+    public static final String MODO_MENOR_MELODICA_ALT_7 = "Alt 7 (superlócrio)";
+    /** Identificadores da familia da menor melodica (espelha ModoMenorMelodica). */
+    private static final Set<String> MODOS_MENOR_MELODICA = Set.of(
+            MODO_MENOR_MELODICA, MODO_MENOR_MELODICA_FRIGIO_6,
+            MODO_MENOR_MELODICA_LIDIO_5SUST, MODO_MENOR_MELODICA_MIXO_4SUST,
+            MODO_MENOR_MELODICA_MIXO_6B, MODO_MENOR_MELODICA_LOCRIO_9,
+            MODO_MENOR_MELODICA_ALT_7);
     /** Modos da escala maior: rotacoes da mesma escala, ancoradas nos shapes validados. */
     public static final String MODO_DORICO = "Dorico";
     public static final String MODO_FRIGIO = "Frigio";
@@ -117,6 +132,13 @@ public class GeradorDeTablatura {
     private static final ShapeMestre SHAPE_3NPC_MENOR_HARMONICA_FRIGIO_DOMINANTE_TRANSPOABLE;
     private static final ShapeMestre SHAPE_3NPC_MENOR_HARMONICA_LIDIO_9SUST_TRANSPOABLE;
     private static final ShapeMestre SHAPE_3NPC_MENOR_HARMONICA_DIMINUTO_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_DORICO_7_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_FRIGIO_6_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_LIDIO_5SUST_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_MIXO_4SUST_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_MIXO_6B_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_LOCRIO_9_TRANSPOABLE;
+    private static final ShapeMestre SHAPE_3NPC_MENOR_MELODICA_ALT_7_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_BLUES_TRANSPOABLE;
     private static final ShapeMestre SHAPE_PENTATONICA_M7_SHAPE2_TRANSPOABLE;
@@ -229,6 +251,37 @@ public class GeradorDeTablatura {
         SHAPE_3NPC_MENOR_HARMONICA_DIMINUTO_TRANSPOABLE = shape3Npc(
                 new int[]{16, 17, 19}, new int[]{15, 17, 19}, new int[]{15, 18, 19},
                 new int[]{16, 17, 19}, new int[]{17, 18, 21}, new int[]{17, 19, 20});
+
+        // Menor melodica (jazz): o PDF menormelodica_shapes.pdf desenha as 7
+        // posicoes 3NPC de A B C D E F# G#. A ordem dos arrays continua sendo
+        // E grave -> E aguda, igual aos demais shapes 3NPC ja validados.
+        Map<String, List<NotaTab>> notas3NpcMenorMelodica = new HashMap<>();
+        notas3NpcMenorMelodica.put("E_high", Arrays.asList(new NotaTab(7, 50), new NotaTab(8, 53), new NotaTab(10, 56)));
+        notas3NpcMenorMelodica.put("B", Arrays.asList(new NotaTab(7, 40), new NotaTab(9, 43), new NotaTab(10, 46)));
+        notas3NpcMenorMelodica.put("G", Arrays.asList(new NotaTab(5, 31), new NotaTab(7, 34), new NotaTab(9, 37)));
+        notas3NpcMenorMelodica.put("D", Arrays.asList(new NotaTab(6, 20), new NotaTab(7, 23), new NotaTab(9, 26)));
+        notas3NpcMenorMelodica.put("A", Arrays.asList(new NotaTab(5, 11), new NotaTab(7, 14), new NotaTab(9, 17)));
+        notas3NpcMenorMelodica.put("E_low", Arrays.asList(new NotaTab(5, 2), new NotaTab(7, 5), new NotaTab(8, 8)));
+        SHAPE_3NPC_MENOR_MELODICA_DORICO_7_TRANSPOABLE = new ShapeMestre(notas3NpcMenorMelodica, 58);
+
+        SHAPE_3NPC_MENOR_MELODICA_FRIGIO_6_TRANSPOABLE = shape3Npc(
+                new int[]{7, 8, 10}, new int[]{7, 9, 11}, new int[]{7, 9, 10},
+                new int[]{7, 9, 11}, new int[]{9, 10, 12}, new int[]{8, 10, 12});
+        SHAPE_3NPC_MENOR_MELODICA_LIDIO_5SUST_TRANSPOABLE = shape3Npc(
+                new int[]{8, 10, 12}, new int[]{9, 11, 12}, new int[]{9, 10, 12},
+                new int[]{9, 11, 13}, new int[]{10, 12, 13}, new int[]{10, 12, 14});
+        SHAPE_3NPC_MENOR_MELODICA_MIXO_4SUST_TRANSPOABLE = shape3Npc(
+                new int[]{10, 12, 14}, new int[]{11, 12, 14}, new int[]{10, 12, 14},
+                new int[]{11, 13, 14}, new int[]{12, 13, 15}, new int[]{12, 14, 16});
+        SHAPE_3NPC_MENOR_MELODICA_MIXO_6B_TRANSPOABLE = shape3Npc(
+                new int[]{12, 14, 16}, new int[]{12, 14, 15}, new int[]{12, 14, 16},
+                new int[]{13, 14, 16}, new int[]{13, 15, 17}, new int[]{14, 16, 17});
+        SHAPE_3NPC_MENOR_MELODICA_LOCRIO_9_TRANSPOABLE = shape3Npc(
+                new int[]{14, 16, 17}, new int[]{14, 15, 17}, new int[]{14, 16, 18},
+                new int[]{14, 16, 17}, new int[]{15, 17, 19}, new int[]{16, 17, 19});
+        SHAPE_3NPC_MENOR_MELODICA_ALT_7_TRANSPOABLE = shape3Npc(
+                new int[]{16, 17, 19}, new int[]{15, 17, 19}, new int[]{16, 18, 19},
+                new int[]{16, 17, 19}, new int[]{17, 19, 21}, new int[]{17, 19, 20});
 
         // Pentatonica m7 (menor pentatonica: 1, b3, 4, 5, b7) na caixa clasica do
         // braco com estritamente 2 notas por corda. Tonica na corda E grave (casa 5).
@@ -653,6 +706,27 @@ public class GeradorDeTablatura {
         } else if (MODO_MENOR_HARMONICA_DIMINUTO.equals(modoNome)) {
             shapeBase = SHAPE_3NPC_MENOR_HARMONICA_DIMINUTO_TRANSPOABLE;
             casaTonicaMestre = 16;
+        } else if (MODO_MENOR_MELODICA.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_DORICO_7_TRANSPOABLE;
+            casaTonicaMestre = 5;
+        } else if (MODO_MENOR_MELODICA_FRIGIO_6.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_FRIGIO_6_TRANSPOABLE;
+            casaTonicaMestre = 7;
+        } else if (MODO_MENOR_MELODICA_LIDIO_5SUST.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_LIDIO_5SUST_TRANSPOABLE;
+            casaTonicaMestre = 8;
+        } else if (MODO_MENOR_MELODICA_MIXO_4SUST.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_MIXO_4SUST_TRANSPOABLE;
+            casaTonicaMestre = 10;
+        } else if (MODO_MENOR_MELODICA_MIXO_6B.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_MIXO_6B_TRANSPOABLE;
+            casaTonicaMestre = 12;
+        } else if (MODO_MENOR_MELODICA_LOCRIO_9.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_LOCRIO_9_TRANSPOABLE;
+            casaTonicaMestre = 14;
+        } else if (MODO_MENOR_MELODICA_ALT_7.equals(modoNome)) {
+            shapeBase = SHAPE_3NPC_MENOR_MELODICA_ALT_7_TRANSPOABLE;
+            casaTonicaMestre = 16;
         } else if (modoNome.contains("Menor")) {
             shapeBase = SHAPE_3NPC_MENOR_TRANSPOABLE;
             casaTonicaMestre = 5;
@@ -661,10 +735,11 @@ public class GeradorDeTablatura {
             casaTonicaMestre = 8;
         }
 
-        // No shape Diminuto a tonica G# existe na casa 4 e na 16. O PDF desenha
-        // a posicao na casa 16, entao preservamos essa oitava apenas para os
-        // modos da menor harmonica (a regra dos gregos permanece intocada).
-        if (MODOS_MENOR_HARMONICA.contains(modoNome)
+        // No shape Diminuto (harmonica) e no Alt 7 (melodica) a tonica G#
+        // existe na casa 4 e na 16. O PDF desenha a posicao na casa 16, entao
+        // preservamos essa oitava apenas nessas familias (a regra dos gregos
+        // permanece intocada).
+        if ((MODOS_MENOR_HARMONICA.contains(modoNome) || MODOS_MENOR_MELODICA.contains(modoNome))
                 && casaTonicaAlvo + OITAVA == casaTonicaMestre) {
             casaTonicaAlvo += OITAVA;
         }

@@ -116,4 +116,52 @@ class EscalatorControllerTest {
                 model.getAttribute("erro"));
         assertNull(model.getAttribute("resultado"));
     }
+
+    @Test
+    void modo13PreservaSequenciasETriadesERedirecionaPadroesForaDaFamilia() {
+        ExtendedModelMap sequencia = new ExtendedModelMap();
+        controller.index("13", "Am", "1", "", true, sequencia);
+        assertEquals("1", sequencia.getAttribute("padraoSelecionado"));
+        assertNull(sequencia.getAttribute("erro"));
+        assertEquals("Sequencia de 3 Notas",
+                ((ResultadoEstudo) sequencia.getAttribute("resultado")).nomePadrao());
+
+        ExtendedModelMap triades = new ExtendedModelMap();
+        controller.index("13", "Am", "2", "", true, triades);
+        assertEquals("2", triades.getAttribute("padraoSelecionado"));
+        assertNull(triades.getAttribute("erro"));
+        assertEquals("Sequencia de Triades",
+                ((ResultadoEstudo) triades.getAttribute("resultado")).nomePadrao());
+
+        ExtendedModelMap invalido = new ExtendedModelMap();
+        controller.index("13", "Am", "23", "", true, invalido);
+        assertEquals("35", invalido.getAttribute("padraoSelecionado"));
+        assertNull(invalido.getAttribute("erro"));
+        assertNotNull(invalido.getAttribute("resultado"));
+
+        @SuppressWarnings("unchecked")
+        List<EscalatorController.TonicaOpcao> tonicas =
+                (List<EscalatorController.TonicaOpcao>) sequencia.getAttribute("tonicas");
+        assertEquals("Am", tonicas.get(0).valor());
+    }
+
+    @Test
+    void controllerDisponibilizaGrupoDaMenorMelodicaNoTemplate() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.index("13", "Am", "35", "", false, model);
+
+        assertNotNull(model.getAttribute("modosMenorMelodica"));
+        assertEquals(7, ((Object[]) model.getAttribute("modosMenorMelodica")).length);
+        assertEquals("Tônica (menor)", model.getAttribute("rotuloTonica"));
+    }
+
+    @Test
+    void shapeDaMenorMelodicaForaDoModoMostraMensagemEspecifica() {
+        ExtendedModelMap model = new ExtendedModelMap();
+        controller.index("1", "Am/C", "35", "", true, model);
+
+        assertEquals("Este shape esta disponivel apenas para a menor melódica.",
+                model.getAttribute("erro"));
+        assertNull(model.getAttribute("resultado"));
+    }
 }

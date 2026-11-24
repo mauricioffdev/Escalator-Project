@@ -197,12 +197,15 @@ public class GeradorDeAlphaTex {
      * sustenidos (F# e C#, nunca Gb ou Db) e quartas com bemois (Gb e Cb, nunca
      * F# ou B).
      *
-     * <p>As pentatônicas m7/blues e as menores usam a relativa maior; os modos da
-     * escala maior usam o parente (ex.: D Dorico usa {@code \ks C}). Nas menores,
-     * o nome da armadura mantém o sufixo {@code minor}, mas soletrado no ciclo
-     * correto (ex.: {@code \ks Abminor}, não {@code A#minor}). As pentatônicas
-     * M7 e m6 guardam o salto do parente no próprio enum (A→D e A→G, na ordem),
-     * com enarmonia forçada quando o resultado passaria de 7 acidentes.</p>
+     * <p>As pentatônicas m7/blues e a menor natural usam a relativa maior; os
+     * modos da escala maior usam o parente (ex.: D Dorico usa {@code \ks C}).
+     * Na menor harmonica o nome da armadura mantém o sufixo {@code minor},
+     * soletrado no ciclo correto (ex.: {@code \ks Abminor}, não
+     * {@code A#minor}). A menor melodica e excecao: sua raiz e um Dorico com
+     * 7+ e usa a parente MAIOR (Am -> {@code \ks G}, com G# escrito na pauta).
+     * As pentatônicas M7 e m6 guardam o salto do
+     * parente no próprio enum (A→D e A→G, na ordem), com enarmonia forçada
+     * quando o resultado passaria de 7 acidentes.</p>
      */
     private static String nomeArmaduraPara(String tonica, String modoNome, boolean usarBemol) {
         Nota nota = Nota.valueOf(tonica.replace("#", "_SHARP"));
@@ -234,6 +237,17 @@ public class GeradorDeAlphaTex {
         if (modoHarmonica.isPresent() && modoHarmonica.get().grau() > 0) {
             Nota parente = Nota.getNotaPorValor(nota.getValor() - modoHarmonica.get().grau());
             return Armadura.nomeDaNota(parente, parente, usarBemol) + "minor";
+        }
+
+        // Na menor melodica a raiz e um Dorico com 7+ da parente MAIOR: Am tem
+        // armadura de G (F# ja na armadura e G# como acidente na pauta), Dm de
+        // C, etc. O salto e aplicado apos remover o grau do root do shape.
+        var modoMelodica = ModoMenorMelodica.porModoTablatura(modoNome);
+        if (modoMelodica.isPresent()) {
+            Nota parente = Nota.getNotaPorValor(nota.getValor()
+                    - modoMelodica.get().grau() + ModoMenorMelodica.SALTO_ARMADURA_MAIOR);
+            String nome = Armadura.nomeParente(parente, usarBemol);
+            return ARMADURAS_ENARMONICAS.getOrDefault(nome, nome);
         }
 
         if (modoNome.startsWith("Menor")) {

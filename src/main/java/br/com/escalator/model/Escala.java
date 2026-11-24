@@ -13,6 +13,8 @@ public class Escala {
     public static final Escala PENTATONICA_M6 = new Escala("Pentatonica m6", new int[]{0, 3, 5, 7, 9});
     /** Menor harmonica: T 2 3b 4 5 6b 7+ (ex.: A B C D E F G#). */
     public static final Escala MENOR_HARMONICA = new Escala("Menor Harmônica", new int[]{0, 2, 3, 5, 7, 8, 11});
+    /** Menor melodica (jazz): T 2 3b 4 5 6 7+ (ex.: A B C D E F# G#). */
+    public static final Escala MENOR_MELODICA = new Escala("Menor Melódica", new int[]{0, 2, 3, 5, 7, 9, 11});
 
     private final String nome;
     private final int[] intervalos;

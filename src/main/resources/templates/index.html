@@ -167,7 +167,7 @@
                             <option value="12" th:selected="${modoSelecionado == '12'}">Pentatonica m6</option>
                             <option value="11" th:selected="${modoSelecionado == '11'}">Pentatonica M7</option>
                             <option value="5" th:selected="${modoSelecionado == '5'}">Menor Harmônica</option>
-                            <option value="" disabled>Menor melódica (futuro)</option>
+                            <option value="13" th:selected="${modoSelecionado == '13'}">Menor Melódica</option>
                         </select>
                     </div>
 
@@ -211,6 +211,12 @@
                             </optgroup>
                             <optgroup id="grupo-menor-harmonica" label="Menor Harmônica (7 shapes)">
                                 <option th:each="modo : ${modosMenorHarmonica}"
+                                        th:value="${modo.padraoOpcao}"
+                                        th:text="${modo.rotulo}"
+                                        th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
+                            </optgroup>
+                            <optgroup id="grupo-menor-melodica" label="Menor Melódica (7 shapes)">
+                                <option th:each="modo : ${modosMenorMelodica}"
                                         th:value="${modo.padraoOpcao}"
                                         th:text="${modo.rotulo}"
                                         th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
@@ -633,7 +639,8 @@
             pentatonicaM7: document.getElementById("grupo-pentatonica-m7"),
             pentatonicaM6: document.getElementById("grupo-pentatonica-m6"),
             gregos: document.getElementById("grupo-modos-gregos"),
-            menorHarmonica: document.getElementById("grupo-menor-harmonica")
+            menorHarmonica: document.getElementById("grupo-menor-harmonica"),
+            menorMelodica: document.getElementById("grupo-menor-melodica")
         };
         if (!Object.values(grupos).some(Boolean)) {
             return;
@@ -648,13 +655,15 @@
         const pentatonicaM6 = modo === "12";
         const escalaMaior = modo === "1";
         const menorHarmonica = modo === "5";
+        const menorMelodica = modo === "13";
 
         const visiveis = {
             pentatonica,
             pentatonicaM7,
             pentatonicaM6,
             gregos: escalaMaior,
-            menorHarmonica
+            menorHarmonica,
+            menorMelodica
         };
         Object.entries(grupos).forEach(([chave, grupo]) => {
             if (!grupo) {
@@ -682,7 +691,10 @@
 
         // Na menor harmonica o antigo Shape 1 (valor 3) nao existe mais: o
         // desenho correspondente e o Eolio 7+ (valor 16), primeiro do grupo.
+        // Na menor melodica as sequencias 1 e 2 continuam validas; quando o
+        // padrao vem de outra familia, volta ao primeiro desenho do PDF (35).
         selectPadrao.value = menorHarmonica ? "16"
+            : menorMelodica ? "35"
             : pentatonicaM7 ? "23"
             : pentatonicaM6 ? "29"
             : escalaMaior ? "9" : "1";

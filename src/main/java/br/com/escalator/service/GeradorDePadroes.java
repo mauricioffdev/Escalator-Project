@@ -17,8 +17,8 @@ public class GeradorDePadroes {
 
     /**
      * Mesma sequencia de N notas, porem partindo dos nomes das notas ja
-     * escritos na convencao da tonalidade (usado pela menor harmonica, cuja
-     * 7maior nao existe no enum de notas).
+     * escritos na convencao da tonalidade (usado pelas menores harmonica e
+     * melodica, cujas notas elevadas nao existem no enum de notas).
      */
     public List<String> gerarSequenciaPorNomes(List<String> nomesDasNotas, int notasPorSequencia) {
         List<String> sequencias = new ArrayList<>();
@@ -60,7 +60,14 @@ public class GeradorDePadroes {
         }
 
         String[] qualidades;
-        if (modoNome.contains("Harmônica")) {
+        if (ModoMenorMelodica.porModoTablatura(modoNome).isPresent()) {
+            // A menor melodica e um Dorico com 7+ (ex.: A B C D E F# G#). Suas
+            // triades diatonicas sao m, m, +, m, m, dim, dim -- diferentes da
+            // menor natural (m, dim, M, m, m, M, M). O nome do modo recebido
+            // aqui e o root do shape, entao nao basta procurar "Menor" no texto.
+            qualidades = new String[]{"menor", "menor", "aumentada", "menor",
+                    "menor", "diminuta", "diminuta"};
+        } else if (modoNome.contains("Harmônica")) {
             qualidades = new String[]{"menor", "diminuta", "aumentada", "menor", "Maior", "Maior", "diminuta"};
         } else if (modoNome.contains("Menor")) {
             qualidades = new String[]{"menor", "diminuta", "Maior", "menor", "menor", "Maior", "Maior"};
