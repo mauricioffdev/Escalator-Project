@@ -45,13 +45,6 @@ public class EscalatorController {
             @RequestParam(defaultValue = "false") boolean gerar,
             Model model
     ) {
-        // Nos 7 modos da escala maior a tonica maior vem primeiro (C/Am);
-        // nas pentatonicas permanece a menor primeiro (Am/C).
-        boolean maiorPrimeiro = MODOS_MAIOR_PRIMEIRO.contains(modo);
-        // Nas menores harmonica e melodica o dropdown mostra so a tonica menor;
-        // a leitura diatonica continua usando uma parente maior propria.
-        boolean somenteMenor = "5".equals(modo)
-                || ModoMenorMelodica.MODO_OPCAO.equals(modo);
         // Tonica enviada sem o relativo (dropdown da menor harmonica ou troca de
         // modo): recupera o par correspondente para os demais modos.
         String parTonica = tonica.contains("/") ? tonica : TONICAS.stream()
@@ -59,6 +52,29 @@ public class EscalatorController {
                 .findFirst()
                 .orElse(tonica);
         String padraoEfetivo = padraoParaModo(modo, padrao);
+        // Os licks agora moram dentro do proprio seletor de Padrão. O parametro
+        // antigo `lick` continua aceito por URLs legadas, mas o valor de `padrao`
+        // tem prioridade para manter um unico controle no formulario.
+        boolean lickLegadoInvalido = false;
+        GeradorDeLicks.Lick lickEscolhido = GeradorDeLicks.porPadrao(padraoEfetivo);
+        if (lickEscolhido == null && lick != null && !lick.isBlank()) {
+            lickEscolhido = GeradorDeLicks.buscar(lick);
+            if (lickEscolhido != null) {
+                padraoEfetivo = lickEscolhido.padraoOpcao();
+            } else {
+                lickLegadoInvalido = true;
+            }
+        }
+        // Com um lick ativo o modo da URL e o da escala de origem do lick:
+        // assim o dropdown mostra somente o grupo correspondente.
+        String modoEfetivo = lickEscolhido == null ? modo : lickEscolhido.modo();
+        // Nos 7 modos da escala maior a tonica maior vem primeiro (C/Am);
+        // nas pentatonicas permanece a menor primeiro (Am/C).
+        boolean maiorPrimeiro = MODOS_MAIOR_PRIMEIRO.contains(modoEfetivo);
+        // Nas menores harmonica e melodica o dropdown mostra so a tonica menor;
+        // a leitura diatonica continua usando uma parente maior propria.
+        boolean somenteMenor = GeradorDeLicks.MODO_MENOR_HARMONICA.equals(modoEfetivo)
+                || ModoMenorMelodica.MODO_OPCAO.equals(modoEfetivo);
         List<TonicaOpcao> tonicas = TONICAS.stream()
                 .map(par -> {
                     String[] partes = par.split("/");
@@ -74,7 +90,7 @@ public class EscalatorController {
         model.addAttribute("rotuloTonica", somenteMenor
                 ? "Tônica (menor)"
                 : (maiorPrimeiro ? "Tônica (maior/menor)" : "Tônica (menor/maior)"));
-        model.addAttribute("modoSelecionado", modo);
+        model.addAttribute("modoSelecionado", modoEfetivo);
         model.addAttribute("tonicaSelecionada", somenteMenor ? parTonica.split("/")[0] : parTonica);
         model.addAttribute("padraoSelecionado", padraoEfetivo);
         model.addAttribute("modosGregos", ModoMaior.values());
@@ -82,17 +98,23 @@ public class EscalatorController {
         model.addAttribute("modosMenorMelodica", ModoMenorMelodica.values());
         model.addAttribute("modosPentatonicaM7", PentatonicaM7.values());
         model.addAttribute("modosPentatonicaM6", PentatonicaM6.values());
-        model.addAttribute("licksDisponiveis", GeradorDeLicks.listar());
-        model.addAttribute("lickSelecionado", lick);
+        // Cada escala recebe somente o seu proprio grupo de licks.
+        model.addAttribute("licksPentaM7",
+                GeradorDeLicks.listarPorModo(GeradorDeLicks.MODO_PENTA_M7));
+        model.addAttribute("licksMenorHarmonica",
+                GeradorDeLicks.listarPorModo(GeradorDeLicks.MODO_MENOR_HARMONICA));
+        model.addAttribute("lickSelecionado", lickEscolhido == null ? "" : lickEscolhido.id());
 
-        if (gerar) {
+        if (gerar && lickLegadoInvalido) {
+            model.addAttribute("erro", "Lick invalido. Selecione uma opcao disponivel.");
+        } else if (gerar) {
             try {
-                ResultadoEstudo resultado = lick != null && !lick.isBlank()
-                        ? escalatorWebService.gerarLick(lick)
-                        : escalatorWebService.gerar(modo, parTonica, padraoEfetivo);
+                ResultadoEstudo resultado = lickEscolhido != null
+                        ? escalatorWebService.gerarLick(lickEscolhido)
+                        : escalatorWebService.gerar(modoEfetivo, parTonica, padraoEfetivo);
                 model.addAttribute("resultado", resultado);
             } catch (IllegalArgumentException ex) {
-                if (lick != null && !lick.isBlank()) {
+                if (lickEscolhido != null) {
                     model.addAttribute("erro", "Lick invalido. Selecione uma opcao disponivel.");
                 } else {
                     boolean shapeMenorForaDoModo = ModoMenorHarmonica.porPadrao(padraoEfetivo).isPresent()
@@ -130,6 +152,11 @@ public class EscalatorController {
     private static String padraoParaModo(String modo, String padrao) {
         if (padrao == null || padrao.isBlank()) {
             return "1";
+        }
+        // Licks pertencem a escala do seu grupo: o valor e preservado e o
+        // controller ajusta o modo efetivo antes de gerar ou renderizar.
+        if (GeradorDeLicks.porPadrao(padrao) != null) {
+            return padrao;
         }
         if ("5".equals(modo)
                 && !"1".equals(padrao)

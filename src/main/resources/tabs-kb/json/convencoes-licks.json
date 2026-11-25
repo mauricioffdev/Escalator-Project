@@ -1,0 +1,30 @@
+{
+  "descricao": "Convenções para novos licks transcritos das tabs do autor. Vale para todo lick futuro.",
+  "tituloNaTab": "Lick N",
+  "tituloObservacao": "N é sequencial dentro da escala. Não incluir nome da escala, tom ou estilo no \\title: o dropdown já identifica a escala pelo grupo.",
+  "velocidade": "Somente no player. Nenhuma marcação de BPM/tempo nas tabs (alphaTex e ASCII) nem na referência textual.",
+  "referencia": "Somente dicas de estilo ou execução (ex.: 'frase bluesy estilo Zakk', 'lick estilo Dime'). Nunca incluir proveniência (fonte, arquivo, faixa, compassos, página ou PDF). Lick sem dica fica com referência vazia.",
+  "modoPentatonicaM7": "3",
+  "modoMenorHarmonica": "5",
+  "gruposDoDropdown": {
+    "grupo-licks-penta-m7": "3",
+    "grupo-licks-menor-harmonica": "5"
+  },
+  "regras": [
+    "Cada escala mostra somente os seus licks; nenhum lick aparece em escala diferente.",
+    "A tablatura ASCII e o alphaTex usam o mesmo título simples Lick N.",
+    "Frets, bends, vibratos e legatos vêm das posições do PDF; pausas só existem se o PDF as mostrar.",
+    "Nenhuma marcação de BPM nas tabs ou na referência: {tempo N} e '♩ = N' são proibidos; a velocidade fica só no player.",
+    "A referência textual só existe quando há dica de estilo/execução; nunca registrar proveniência (fonte, faixa, compassos, página ou PDF). Sem dica, referência vazia.",
+    "O acompanhamento (sistema inferior) permanece apenas como referência, sem evento tocável."
+  ],
+  "notasCromaticasDocumentadas": [
+    {
+      "lick": "penta-m7-03",
+      "corda": 3,
+      "traste": 8,
+      "nota": "D#",
+      "funcao": "passagem cromática entre G7 e G5, presente no PDF (página 2, X≈257)"
+    }
+  ]
+}

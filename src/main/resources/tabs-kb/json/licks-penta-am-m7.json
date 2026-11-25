@@ -1,0 +1,635 @@
+{
+  "versao": 1,
+  "descricao": "Catalogo de licks fixos, espelho legivel de GeradorDeLicks.java",
+  "convencaoTitulo": "Lick N - escala identificada pelo grupo do dropdown",
+  "fontePdf": "src/main/resources/tabs-kb/pdf/Licks_Penta_Am_Rock.pdf",
+  "licks": [
+    {
+      "id": "frigio-dominante",
+      "padraoOpcao": "42",
+      "modo": "5",
+      "titulo": "Lick 1",
+      "notasFormatadas": "[E, F, G#, A, B, C, D]",
+      "nomePadrao": "Lick 1 - Menor Harmônica (Frígio Dominante)",
+      "referencia": "",
+      "compassos": [
+        {
+          "numero": 1,
+          "duracao": ":16",
+          "golpes": [
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 12, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 15, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        },
+        {
+          "numero": 2,
+          "duracao": ":4",
+          "tuplet": "6:4",
+          "golpes": [
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 12, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 1, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 1, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 1, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 1, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 2, "traste": 17, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 2, "traste": 15, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 2, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 3, "traste": 16, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 3, "traste": 14, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 3, "traste": 13, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 4, "traste": 14, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 0.6666666666666666,
+              "notas": [
+                {"corda": 4, "traste": 12, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 4.0,
+              "notas": [
+                {"corda": 4, "traste": 14, "bendFull": false, "vibrato": true, "pullOff": false}
+              ]
+            }
+          ]
+        }
+        ],
+      "alphaTex": "\\title \"Lick 1\"\n\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n\\instrument 29\n\\ts 4 4\n\\ks C\n:16 13.2 17.1 16.1 17.1 13.1 17.1 16.1 17.1 16.1 17.1 13.1 17.1 12.1 17.1 15.2 17.1 |\n:16 13.2 17.1 12.2 17.1 :16 { tu 6 } 16.1 17.1 16.1 13.1 17.2 15.2 13.2 16.3 14.3 13.3 14.4 12.4 :4 14.4{ v } |\n",
+      "tablatura": "e |---17-16-17-13-17-16-17-16-17-13-17-12-17----17-|---17----17-16-17-16-13----------------------------|\r\nB |13----------------------------------------15----|13----12----------------17-15-13-------------------|\r\nG |------------------------------------------------|---------------------------------16-14-13----------|\r\nD |------------------------------------------------|------------------------------------------14-12-14~|\r\nA |------------------------------------------------|---------------------------------------------------|\r\nE |------------------------------------------------|---------------------------------------------------|"
+    },
+    {
+      "id": "penta-m7-bluesy",
+      "padraoOpcao": "43",
+      "modo": "3",
+      "titulo": "Lick 1",
+      "notasFormatadas": "[A, C, D, E, G]",
+      "nomePadrao": "Lick 1 - Pentatônica m7",
+      "referencia": "Frase bluesy, muito usada no rock clássico e heavy tradicional.",
+      "compassos": [
+        {
+          "numero": 1,
+          "duracao": ":8",
+          "tuplet": "3",
+          "golpes": [
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        },
+        {
+          "numero": 2,
+          "duracao": ":1",
+          "golpes": [
+            {
+              "unidades": 16.0,
+              "notas": [
+                {"corda": 2, "traste": 8, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        }
+        ],
+      "alphaTex": "\\title \"Lick 1\"\n\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n\\instrument 29\n\\ts 4 4\n\\ks C\n:8 { tu 3 } 7.3{b (0 4)} 5.2 5.1 7.3{b (0 4)} 5.2 5.1 7.3{b (0 4)} 5.2 5.1 7.3{b (0 4)} 5.2 5.1 |\n:1 8.2{b (0 4)} |\n",
+      "tablatura": "e |------5--------5--------5--------5--|---|\r\nB |---5--------5--------5--------5-----|8b-|\r\nG |7b-------7b-------7b-------7b-------|---|\r\nD |------------------------------------|---|\r\nA |------------------------------------|---|\r\nE |------------------------------------|---|"
+    },
+    {
+      "id": "penta-m7-zw",
+      "padraoOpcao": "44",
+      "modo": "3",
+      "titulo": "Lick 2",
+      "notasFormatadas": "[A, C, D, E, G]",
+      "nomePadrao": "Lick 2 - Pentatônica m7",
+      "referencia": "Frase estilo ZW (Zakk Wylde) no primeiro shape da penta de Am.",
+      "compassos": [
+        {
+          "numero": 1,
+          "duracao": ":8",
+          "tuplet": "3",
+          "golpes": [
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        },
+        {
+          "numero": 2,
+          "duracao": ":8",
+          "tuplet": "3",
+          "golpes": [
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 3, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 5, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 5, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 4, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 5, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 5, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 6, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.3333333333333333,
+              "notas": [
+                {"corda": 6, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        },
+        {
+          "numero": 3,
+          "duracao": ":1",
+          "golpes": [
+            {
+              "unidades": 16.0,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        }
+        ],
+      "alphaTex": "\\title \"Lick 2\"\n\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n\\instrument 29\n\\ts 4 4\n\\ks C\n:8 { tu 3 } 8.1 5.1 8.2 5.2 7.3 5.3 8.2 5.2 7.3 5.3 7.4 5.4 |\n:8 { tu 3 } 7.3 5.3 7.4 5.4 7.5 5.5 7.4 5.4 7.5 5.5 8.6 5.6 |\n:1 7.4 |\n",
+      "tablatura": "e |8--5--------------------------------|------------------------------------|---|\r\nB |------8--5--------8--5--------------|------------------------------------|---|\r\nG |------------7--5--------7--5--------|7--5--------------------------------|---|\r\nD |------------------------------7--5--|------7--5--------7--5--------------|7--|\r\nA |------------------------------------|------------7--5--------7--5--------|---|\r\nE |------------------------------------|------------------------------8--5--|---|"
+    },
+    {
+      "id": "penta-m7-03",
+      "padraoOpcao": "45",
+      "modo": "3",
+      "titulo": "Lick 3",
+      "notasFormatadas": "[A, C, D, E, G]",
+      "nomePadrao": "Lick 3 - Pentatônica m7",
+      "referencia": "",
+      "compassos": [
+        {
+          "numero": 1,
+          "duracao": ":16",
+          "golpes": [
+            {
+              "unidades": 2.0,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": true, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 1, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": true}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 3, "traste": 8, "bendFull": false, "vibrato": false, "pullOff": true}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": true}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 3, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 3, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 1.0,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            },
+            {
+              "unidades": 2.0,
+              "notas": [
+                {"corda": 2, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false},
+                {"corda": 3, "traste": 5, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        },
+        {
+          "numero": 2,
+          "duracao": ":1",
+          "golpes": [
+            {
+              "unidades": 16.0,
+              "notas": [
+                {"corda": 4, "traste": 7, "bendFull": false, "vibrato": false, "pullOff": false}
+              ]
+            }
+          ]
+        }
+        ],
+      "alphaTex": "\\title \"Lick 3\"\n\\tuning (E4 B3 G3 D3 A2 E2) { hide }\n\\instrument 29\n\\ts 4 4\n\\ks C\n:8 7.3{b (0 4)} :16 5.2 5.1 8.2{h} 5.2 7.3 5.2 8.3{h} 7.3{h} 5.3 7.4 7.3 7.4 :8 (5.2 5.3 ) |\n:1 7.4 |\n",
+      "tablatura": "e |------5-----------------------------------|---|\r\nB |---5-----8p-5-----5--------------------5--|---|\r\nG |7b-------------7-----8p-7p-5-----7-----5--|---|\r\nD |------------------------------7-----7-----|7--|\r\nA |------------------------------------------|---|\r\nE |------------------------------------------|---|"
+    }
+  ]
+}

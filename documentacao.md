@@ -40,3 +40,35 @@ O projeto faz uso de coleções de dados para armazenar e manipular informaçõe
     * **Estruturas Condicionais (`if`, `else if`, `switch`)**: Usadas para direcionar a lógica do programa, como na escolha do modo (Maior ou Menor) e na seleção da opção de padrão de treino.
 * **Manipulação de Strings**: Métodos como `toUpperCase()`, `replace()`, `contains()` e `String.format()` foram usados para processar e formatar a entrada do usuário e a saída do console, tornando a interação mais intuitiva e as saídas mais legíveis.
 * **Tratamento de Exceções (`try-catch`)**: O bloco `try-catch` é usado para lidar com o erro de `IllegalArgumentException` quando o usuário digita uma nota inválida, garantindo que o programa não pare de forma abrupta.
+
+#### 4. Licks fixos e base de conhecimento (`tabs-kb`)
+
+A base local de tablaturas e contratos fica em `src/main/resources/tabs-kb/`:
+
+* `pdf/Licks_Penta_Am_Rock.pdf`: fonte original dos três licks da pentatônica m7. PDFs adicionados recentemente ficam fora do Git (`.gitignore`); o que é versionado são os dados derivados.
+* `json/licks-penta-am-m7-fonte.json`: dados posicionais extraídos do PDF (glifos, palavras e linhas da tablatura), usados como evidência nas auditorias musicais.
+* `json/licks-penta-am-m7.json`: espelho legível do catálogo Java, gerado a partir dos DTOs públicos. Contém `id`, `padraoOpcao`, `modo`, `titulo`, `alphaTex`, `tablatura`, `referencia` e os compassos com `unidades`, `bendFull`, `vibrato` e `pullOff`.
+* `json/convencoes-licks.json`: contrato aplicado a todo lick novo (título, grupo por escala, velocidade e referência).
+
+`GeradorDeLicks` centraliza quatro licks prontos, selecionáveis pelo próprio dropdown **Padrão**:
+
+| Valor | ID legado | Escala | Título | Conteúdo |
+| --- | --- | --- | --- | --- |
+| `42` | `frigio-dominante` | Menor harmônica (modo 5) | Lick 1 | E Frígio Dominante; 16 semicolcheias + 4 semicolcheias, 12 sextinas (6:4) e nota final com vibrato |
+| `43` | `penta-m7-bluesy` | Pentatônica m7 (modo 3) | Lick 1 | quatro grupos de tercina `G7` (bend full) -> `B5` -> `e5`; final `B8` com bend full |
+| `44` | `penta-m7-zw` | Pentatônica m7 (modo 3) | Lick 2 | dois compassos de tercinas e `D7` (Lá na 4ª corda) sustentado |
+| `45` | `penta-m7-03` | Pentatônica m7 (modo 3) | Lick 3 | bend full na primeira nota `G7`, pull-offs `B8->B5` e `G8->G7->G5`, passagem cromática `G8` documentada, acorde `B5+G5` e final `D7` |
+
+Os IDs legados continuam aceitos pelo parâmetro `lick` de URLs antigas; o valor de `padrao` tem prioridade. No template, cada escala mostra somente o seu grupo: os licks da pentatônica ficam abaixo dos shapes da pentatônica e o lick da menor harmônica fica abaixo dos shapes da menor harmônica.
+
+#### 5. Sintaxe musical e regras permanentes dos licks
+
+* Durações em semicolcheias: `16`, `4`, `2` e `1` unidades viram `:1`, `:4`, `:8` e `:16` no AlphaTex. Cada compasso é validado com soma exata de 16 unidades em 4/4, sem pausas implícitas.
+* Efeitos: `{b (0 4)}` é bend full (dois semitons), `{h}` inicia a ligadura — o AlphaTab decide entre hammer-on e pull-off pela casa da nota seguinte na mesma corda — e `{v}` é vibrato. Tercinas usam `:8 { tu 3 }` e sextinas `:16 { tu 6 }`.
+* Título na tablatura ASCII e no `\title` do AlphaTex é sempre `Lick N`, sequencial dentro da escala; escala e estilo são identificados pelo dropdown.
+* Velocidade: nenhuma marcação de BPM/tempo nas tabs ou na referência (`{tempo N}` e `♩ = N` são proibidos). A velocidade é controlada somente pelo player (`#playerTempo`).
+* Referência textual: só é preenchida quando há dica de estilo ou execução (ex.: `frase bluesy estilo Zakk`, `lick estilo Dime`). Nunca registra proveniência (fonte, arquivo, faixa, compassos, página ou PDF); sem dica, fica vazia e o rótulo some na tela.
+
+#### 6. Validação automatizada
+
+`LicksAuditoriaTest` confere compassos fechando 4/4, notas pertencentes à escala (com a exceção cromática documentada), efeitos, durações reais do AlphaTex e ausência de BPM/proveniência. `LicksJsonTest` garante que o JSON é espelho fiel do catálogo e do contrato. `EscalatorControllerTest` cobre seleção por `padrao`/`lick`, modo efetivo, rótulo da tônica e referências. O fluxo termina com `mvn -q test`, `git -c core.whitespace=cr-at-eol diff --check`, auditoria musical e revisão de código.

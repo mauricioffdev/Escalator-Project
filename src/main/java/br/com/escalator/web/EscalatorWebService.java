@@ -293,19 +293,17 @@ public class EscalatorWebService {
         };
     }
 
-    /** Gera o lick fixo escolhido no dropdown de Licks. */
-    public ResultadoEstudo gerarLick(String lickOpcao) {
-        GeradorDeLicks.Lick lick = GeradorDeLicks.buscar(lickOpcao);
-        if (lick == null) {
-            throw new IllegalArgumentException("Lick invalido");
-        }
+    /** Gera o resultado a partir de um lick ja resolvido pelo controller. */
+    public ResultadoEstudo gerarLick(GeradorDeLicks.Lick lick) {
         return new ResultadoEstudo(
                 lick.titulo(),
                 lick.notasFormatadas(),
                 lick.nomePadrao(),
                 List.of(),
                 lick.tablatura(),
-                lick.alphaTex());
+                lick.alphaTex(),
+                "",
+                lick.referencia());
     }
 
     /** Gera a tablatura ASCII e o AlphaTex para o shape/modo informado. */

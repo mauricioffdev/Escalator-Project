@@ -164,4 +164,67 @@ class EscalatorControllerTest {
                 model.getAttribute("erro"));
         assertNull(model.getAttribute("resultado"));
     }
+
+    @Test
+    void licksSaoSelecionaveisPeloValorDoDropdownPadrao() {
+        List<String> padroes = List.of("42", "43", "44", "45");
+        List<String> modos = List.of("5", "3", "3", "3");
+        List<String> referencias = List.of("",
+                "Frase bluesy, muito usada no rock clássico e heavy tradicional.",
+                "Frase estilo ZW (Zakk Wylde) no primeiro shape da penta de Am.", "");
+        for (int i = 0; i < padroes.size(); i++) {
+            String padrao = padroes.get(i);
+            ExtendedModelMap model = new ExtendedModelMap();
+
+            controller.index("1", "Am/C", padrao, "", true, model);
+
+            assertEquals(padrao, model.getAttribute("padraoSelecionado"), padrao);
+            assertEquals(modos.get(i), model.getAttribute("modoSelecionado"), padrao);
+            assertEquals("5".equals(modos.get(i)) ? "Tônica (menor)" : "Tônica (menor/maior)",
+                    model.getAttribute("rotuloTonica"), padrao);
+            assertEquals(3, ((List<?>) model.getAttribute("licksPentaM7")).size());
+            assertEquals(1, ((List<?>) model.getAttribute("licksMenorHarmonica")).size());
+            assertNull(model.getAttribute("erro"), padrao);
+            ResultadoEstudo resultado = (ResultadoEstudo) model.getAttribute("resultado");
+            assertNotNull(resultado, padrao);
+            assertEquals(referencias.get(i), resultado.referencia(), padrao);
+        }
+    }
+
+    @Test
+    void urlsLegadasComParametroLickContinuamFuncionando() {
+        List<String> licks = List.of("frigio-dominante", "penta-m7-bluesy",
+                "penta-m7-zw", "penta-m7-03");
+        List<String> padroes = List.of("42", "43", "44", "45");
+        List<String> titulos = List.of("Lick 1", "Lick 1", "Lick 2", "Lick 3");
+        List<String> modos = List.of("5", "3", "3", "3");
+        List<String> referencias = List.of("",
+                "Frase bluesy, muito usada no rock clássico e heavy tradicional.",
+                "Frase estilo ZW (Zakk Wylde) no primeiro shape da penta de Am.", "");
+        for (int i = 0; i < licks.size(); i++) {
+            String lick = licks.get(i);
+            ExtendedModelMap model = new ExtendedModelMap();
+
+            controller.index("1", "Am/C", "1", lick, true, model);
+
+            assertNull(model.getAttribute("erro"), lick);
+            assertEquals(padroes.get(i), model.getAttribute("padraoSelecionado"), lick);
+            assertEquals(modos.get(i), model.getAttribute("modoSelecionado"), lick);
+            ResultadoEstudo resultado = (ResultadoEstudo) model.getAttribute("resultado");
+            assertNotNull(resultado, lick);
+            assertEquals(titulos.get(i), resultado.titulo(), lick);
+            assertEquals(referencias.get(i), resultado.referencia(), lick);
+            assertEquals(lick, model.getAttribute("lickSelecionado"));
+        }
+    }
+
+    @Test
+    void parametroLickInvalidoMostraErroEmVezDeGerarEstudoComum() {
+        ExtendedModelMap model = new ExtendedModelMap();
+
+        controller.index("1", "Am/C", "1", "nao-existe", true, model);
+
+        assertEquals("Lick invalido. Selecione uma opcao disponivel.", model.getAttribute("erro"));
+        assertNull(model.getAttribute("resultado"));
+    }
 }

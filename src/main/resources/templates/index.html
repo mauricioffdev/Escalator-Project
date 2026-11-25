@@ -178,7 +178,7 @@
                         </select>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-9">
                         <label for="padrao" class="form-label">Padrão</label>
                         <select id="padrao" name="padrao" class="form-select">
                             <option value="1" th:selected="${padraoSelecionado == '1'}">Sequência de 3 notas</option>
@@ -190,6 +190,12 @@
                                 <option value="6" th:selected="${padraoSelecionado == '6'}">Shape 4</option>
                                 <option value="7" th:selected="${padraoSelecionado == '7'}">Shape 5</option>
                                 <option value="8" th:selected="${padraoSelecionado == '8'}">Shape Extra (3 oitavas)</option>
+                            </optgroup>
+                            <optgroup id="grupo-licks-penta-m7" label="Licks - Pentatônica m7">
+                                <option th:each="lick : ${licksPentaM7}"
+                                        th:value="${lick.padraoOpcao}"
+                                        th:text="${lick.titulo}"
+                                        th:selected="${padraoSelecionado == lick.padraoOpcao}"></option>
                             </optgroup>
                             <optgroup id="grupo-modos-gregos" label="Modos gregos (Escala maior)">
                                 <option th:each="modo : ${modosGregos}"
@@ -215,23 +221,18 @@
                                         th:text="${modo.rotulo}"
                                         th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
                             </optgroup>
+                            <optgroup id="grupo-licks-menor-harmonica" label="Licks - Menor Harmônica">
+                                <option th:each="lick : ${licksMenorHarmonica}"
+                                        th:value="${lick.padraoOpcao}"
+                                        th:text="${lick.titulo}"
+                                        th:selected="${padraoSelecionado == lick.padraoOpcao}"></option>
+                            </optgroup>
                             <optgroup id="grupo-menor-melodica" label="Menor Melódica (7 shapes)">
                                 <option th:each="modo : ${modosMenorMelodica}"
                                         th:value="${modo.padraoOpcao}"
                                         th:text="${modo.rotulo}"
                                         th:selected="${padraoSelecionado == modo.padraoOpcao}"></option>
                             </optgroup>
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-md-9">
-                        <label for="lick" class="form-label">Licks</label>
-                        <select id="lick" name="lick" class="form-select">
-                            <option value="" th:selected="${lickSelecionado == null or lickSelecionado.isEmpty()}">Nenhum</option>
-                            <option th:each="lick : ${licksDisponiveis}"
-                                    th:value="${lick.id}"
-                                    th:text="${lick.titulo}"
-                                    th:selected="${lick.id == lickSelecionado}"></option>
                         </select>
                     </div>
 
@@ -251,6 +252,9 @@
                     </p>
                     <p class="mb-2"><strong>Tonica atual:</strong> <span id="tonica-atual">-</span></p>
                     <p class="mb-3"><strong>Padrão escolhido:</strong> <span th:text="${resultado.nomePadrao}"></span></p>
+                    <p class="mb-3" th:if="${resultado.referencia != null and !resultado.referencia.isEmpty()}">
+                        <strong>Referência:</strong> <span id="referencia-resultado" th:text="${resultado.referencia}"></span>
+                    </p>
 
                     <pre th:if="${resultado != null and lickSelecionado != null and !lickSelecionado.isEmpty() and !resultado.tablaturaFormatada.isEmpty()}"
                          class="tablatura visually-hidden"
@@ -640,7 +644,9 @@
             pentatonicaM6: document.getElementById("grupo-pentatonica-m6"),
             gregos: document.getElementById("grupo-modos-gregos"),
             menorHarmonica: document.getElementById("grupo-menor-harmonica"),
-            menorMelodica: document.getElementById("grupo-menor-melodica")
+            menorMelodica: document.getElementById("grupo-menor-melodica"),
+            licksPentaM7: document.getElementById("grupo-licks-penta-m7"),
+            licksMenorHarmonica: document.getElementById("grupo-licks-menor-harmonica")
         };
         if (!Object.values(grupos).some(Boolean)) {
             return;
@@ -663,7 +669,10 @@
             pentatonicaM6,
             gregos: escalaMaior,
             menorHarmonica,
-            menorMelodica
+            menorMelodica,
+            // Licks acompanham a escala: apenas pentatonica m7 e menor harmonica.
+            licksPentaM7: modo === "3",
+            licksMenorHarmonica: menorHarmonica
         };
         Object.entries(grupos).forEach(([chave, grupo]) => {
             if (!grupo) {
@@ -673,8 +682,8 @@
             grupo.disabled = !visiveis[chave];
         });
 
-        // Com lick ativo o select esta desabilitado e nao participa do form;
-        // apenas a visibilidade e ajustada, sem alterar o valor selecionado.
+        // Com lick ativo o grupo continua visivel e selecionavel; apenas os
+        // controles de escala sao desabilitados em configurarSelecaoLick().
         if (!redefinirSelecao) {
             return;
         }
@@ -700,35 +709,38 @@
             : escalaMaior ? "9" : "1";
     }
 
-    // Quando um lick esta selecionado, os controles de escala nao sao usados.
-    // Desabilita-os para deixar claro que o lick tem prioridade no formulario.
+    // Licks sao opcoes do proprio Padrão, organizadas por escala. O modo
+    // permanece habilitado para que o grupo correto seja exibido e enviado.
+    function lickAtivo() {
+        const selectPadrao = document.getElementById("padrao");
+        const opcao = selectPadrao && selectPadrao.selectedOptions[0];
+        const grupo = opcao && opcao.parentElement;
+        return !!(grupo && grupo.tagName === "OPTGROUP"
+            && grupo.id.startsWith("grupo-licks-"));
+    }
+
     function configurarSelecaoLick() {
-        const selectLick = document.getElementById("lick");
-        if (!selectLick) {
-            return;
+        const selectTonica = document.getElementById("tonica");
+        if (selectTonica) {
+            selectTonica.disabled = lickAtivo();
         }
-
-        const lickAtivo = selectLick.value !== "";
-        ["modo", "tonica", "padrao"].forEach(id => {
-            const select = document.getElementById(id);
-            if (select) {
-                select.disabled = lickAtivo;
-            }
-        });
-
-        configurarOpcoesPadrao(!lickAtivo);
+        configurarOpcoesPadrao(false);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
         configurarSelecaoLick();
         const selectModo = document.getElementById("modo");
         if (selectModo) {
-            selectModo.addEventListener("change", () => configurarOpcoesPadrao());
+            selectModo.addEventListener("change", () => {
+                configurarOpcoesPadrao();
+                // Saiu de um lick: a tonica volta a ficar selecionavel.
+                configurarSelecaoLick();
+            });
         }
 
-        const selectLick = document.getElementById("lick");
-        if (selectLick) {
-            selectLick.addEventListener("change", configurarSelecaoLick);
+        const selectPadrao = document.getElementById("padrao");
+        if (selectPadrao) {
+            selectPadrao.addEventListener("change", configurarSelecaoLick);
         }
 
         const selectTonica = document.getElementById("tonica");
